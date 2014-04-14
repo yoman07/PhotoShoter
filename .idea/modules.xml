@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/MapsMenuDrawerParseFAcebookBootstrapProject.iml" filepath="$PROJECT_DIR$/MapsMenuDrawerParseFAcebookBootstrapProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PhotoShot.iml" filepath="$PROJECT_DIR$/PhotoShot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PhotoShoter.iml" filepath="$PROJECT_DIR$/PhotoShoter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" filepath="$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ZdobywaczProject.iml" filepath="$PROJECT_DIR$/ZdobywaczProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/facebook/facebook.iml" filepath="$PROJECT_DIR$/libraries/facebook/facebook.iml" />
+    </modules>
+  </component>
+</project>
+
