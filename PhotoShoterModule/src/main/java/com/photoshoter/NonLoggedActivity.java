@@ -6,10 +6,11 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Window;
 
 import com.facebook.LoggingBehavior;
 import com.facebook.Request;
@@ -30,8 +31,11 @@ import java.util.List;
 
 public class NonLoggedActivity extends ActionBarActivity {
     public Dialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         printFacebookHash();
         Log.i("MainActivity", "test logowania");
@@ -41,7 +45,7 @@ public class NonLoggedActivity extends ActionBarActivity {
         Request request = Request.newGraphPathRequest(null, "/4", new Request.Callback() {
             @Override
             public void onCompleted(Response response) {
-                if(response.getError() != null) {
+                if (response.getError() != null) {
                     Log.i("MainActivity", String.format("Error making request: %s", response.getError()));
                 } else {
                     GraphUser user = response.getGraphObjectAs(GraphUser.class);
@@ -143,9 +147,6 @@ public class NonLoggedActivity extends ActionBarActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
-
-
-
 
 
 }
