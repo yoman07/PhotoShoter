@@ -1,32 +1,31 @@
 package com.photoshoter;
 
 import android.app.Activity;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.TextView;
 
-public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+import com.joanzapata.android.iconify.IconDrawable;
+import com.joanzapata.android.iconify.Iconify;
+import com.photoshoter.popups.MessagesWindow;
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
+public class MainActivity extends ActionBarActivity {
+
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,57 +46,16 @@ public class MainActivity extends ActionBarActivity
 //                .snippet("The most populous city in Australia.")
 //                .position(sydney));
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+//        mNavigationDrawerFragment = (NavigationDrawerFragment)
+//                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+//        mTitle = getTitle();
+//
+//        // Set up the drawer.
+//        mNavigationDrawerFragment.setUp(
+//                R.id.navigation_drawer,
+//                (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
-
-
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        switch (position)  {
-            case 0:
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, new ZdobywaczMapFragment())
-                        .commit();
-                break;
-            case 1:
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, new PlannedTourFragment())
-                        .commit();
-                break;
-            case 2:
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, new HistoryTourFragment())
-                        .commit();
-                break;
-            case 3:
-
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, new ProfileFragment())
-                        .commit();
-                break;
-            case 5:
-                showSettingsFragment();
-                break;
-            default:
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                        .commit();
-                break;
-        }
-
-        // update the main content by replacing fragments
-
-
-    }
 
     public void onSectionAttached(int number) {
         switch (number) {
@@ -106,12 +64,6 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-            case 4:
-                mTitle = getString(R.string.title_section4);
                 break;
         }
     }
@@ -124,16 +76,23 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
-        }
+        getMenuInflater().inflate(R.menu.main, menu);
+        this.menu=menu;
+        menu.findItem(R.id.action_example).setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_map_marker)
+                        .colorRes(R.color.navigation_drawer_text)
+                        .actionBarSize());
+        restoreActionBar();
+//            return true;
+//        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -143,21 +102,25 @@ public class MainActivity extends ActionBarActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                mNavigationDrawerFragment.selectItem(5);
+            case R.id.action_example:
+                menu.findItem(R.id.action_example).setIcon(
+                        new IconDrawable(this, Iconify.IconValue.fa_map_marker)
+                                .colorRes(R.color.actionbar_red)
+                                .actionBarSize());
+                showMessagesWindow();
 
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showSettingsFragment() {
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, new SettingsFragment());
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+    /**
+     * Opens Dialog with received messages
+     */
+    private void showMessagesWindow() {
+        FragmentManager fm = getSupportFragmentManager();
+        MessagesWindow messagesWindowDialog = new MessagesWindow();
+        messagesWindowDialog.show(fm, "fragment_messages_window");
     }
 
     /**
@@ -201,5 +164,7 @@ public class MainActivity extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
+
+
 
 }
