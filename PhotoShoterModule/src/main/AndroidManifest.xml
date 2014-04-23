@@ -21,13 +21,15 @@
         <activity
             android:name="com.photoshoter.LoginActivity"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateVisible"></activity>
+            android:windowSoftInputMode="adjustResize|stateVisible"
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name="com.photoshoter.MainActivity"
             android:label="@string/title_activity_main"></activity>
         <activity
             android:name="com.photoshoter.NonLoggedActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

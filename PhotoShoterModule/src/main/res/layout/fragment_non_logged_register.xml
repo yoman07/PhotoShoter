@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/green_zdobywacz">
 
     <!-- Login progress -->
-    <LinearLayout android:id="@+id/login_status"
+    <LinearLayout
+        android:id="@+id/login_status"
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center_horizontal"
         android:orientation="vertical">
-        <ProgressBar style="?android:attr/progressBarStyleLarge"
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp" />
+
         <TextView
             android:id="@+id/login_status_message"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -32,48 +38,72 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout style="@style/LoginFormContainer"
+        <LinearLayout
+            style="@style/LoginFormContainer"
             android:orientation="vertical"
-            android:gravity="top">
+            android:gravity="top"
+            android:layout_gravity="center_vertical">
 
             <EditText
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:ems="10"
                 android:id="@+id/nickInput"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                android:hint="nick"
+                android:hint="@string/prompt_nick"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:textColor="@color/navigation_drawer_text"
+                android:textColorHint="@color/navigation_drawer_text"
                 android:maxLines="1" />
 
             <EditText
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
                 android:ems="10"
                 android:id="@+id/emailInput"
                 android:layout_gravity="center_horizontal"
-                android:hint="email"
+                android:hint="@string/prompt_email"
                 android:singleLine="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:textColor="@color/navigation_drawer_text"
+                android:layout_marginTop="5dp"
+                android:textColorHint="@color/navigation_drawer_text"
                 android:maxLines="1" />
 
             <EditText
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:ems="10"
                 android:id="@+id/passwordInput"
                 android:layout_gravity="center_horizontal"
-                android:hint="Password"
+                android:hint="@string/prompt_password"
+                android:textColorHint="@color/navigation_drawer_text"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/navigation_drawer_text"
                 android:singleLine="true"
                 android:maxLines="1" />
-            <Button android:id="@+id/register_button"
-                android:layout_width="209dp"
+
+            <Button
+                android:id="@+id/register_button"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/action_register_short"
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/other_login_button"
+                android:textColor="@color/navigation_drawer_text"
+                android:textStyle="bold"
                 android:layout_gravity="center_horizontal" />
 
 
