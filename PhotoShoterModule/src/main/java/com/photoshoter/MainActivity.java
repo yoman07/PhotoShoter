@@ -1,18 +1,16 @@
 package com.photoshoter;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.RelativeLayout;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 import com.photoshoter.popups.MessagesWindow;
@@ -20,93 +18,60 @@ import com.photoshoter.popups.MessagesWindow;
 public class MainActivity extends ActionBarActivity {
 
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.fragment_map);
 
-//        // Get a handle to the Map Fragment
-//        GoogleMap map = ((ZdobywaczMapFragment) getFragmentManager()
-//                .findFragmentById(R.id.map)).getMap();
-//
-//        LatLng sydney = new LatLng(-33.867, 151.206);
-//
-//        map.setMyLocationEnabled(true);
-//        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));
-//
-//        map.addMarker(new MarkerOptions()
-//                .title("Sydney")
-//                .snippet("The most populous city in Australia.")
-//                .position(sydney));
-
-//        mNavigationDrawerFragment = (NavigationDrawerFragment)
-//                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-//        mTitle = getTitle();
-//
-//        // Set up the drawer.
-//        mNavigationDrawerFragment.setUp(
-//                R.id.navigation_drawer,
-//                (DrawerLayout) findViewById(R.id.drawer_layout));
+        setUpMapIfNeeded();
     }
 
-
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-        }
-    }
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        actionBar.setTitle(R.string.app_name);
     }
 
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setUpMapIfNeeded();
+    }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
+
         getMenuInflater().inflate(R.menu.main, menu);
-        this.menu=menu;
+        this.menu = menu;
         menu.findItem(R.id.action_example).setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_map_marker)
+                new IconDrawable(this, Iconify.IconValue.fa_bell_o)
                         .colorRes(R.color.navigation_drawer_text)
-                        .actionBarSize());
+                        .actionBarSize()
+        );
         restoreActionBar();
-//            return true;
-//        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         switch (item.getItemId()) {
             case R.id.action_example:
+                //TODO: temporary - for tests only
                 menu.findItem(R.id.action_example).setIcon(
-                        new IconDrawable(this, Iconify.IconValue.fa_map_marker)
-                                .colorRes(R.color.actionbar_red)
-                                .actionBarSize());
+                        new IconDrawable(this, Iconify.IconValue.fa_bell)
+                                .colorRes(R.color.actionbar_bell)
+                                .actionBarSize()
+                );
                 showMessagesWindow();
 
                 return true;
@@ -123,48 +88,25 @@ public class MainActivity extends ActionBarActivity {
         messagesWindowDialog.show(fm, "fragment_messages_window");
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            // Try to obtain the map from the SupportMapFragment.
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
+            //Set up and align My Location Button
+            mMap.setMyLocationEnabled(true);
+            View vw = getWindow().getDecorView().findViewById(android.R.id.content);
+            View locationButton = ((View) vw.findViewById(1).getParent()).findViewById(2);
+            RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+            rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+            rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            rlp.setMargins(10, 0, 0, 20);
 
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
-
-
 
 }

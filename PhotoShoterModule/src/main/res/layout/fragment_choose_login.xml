@@ -6,30 +6,60 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:background="@color/green_zdobywacz"
     tools:context=".NonLoggedActivity$PlaceholderFragment">
 
     <TextView
-        android:text="@string/hello_world"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true" />
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:id="@+id/centerDummyLay"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
+
+    <TextView
+        android:text="@string/app_name"
+        android:id="@+id/appnameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/centerDummyLay"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp"
+        android:textStyle="bold|italic"
+        android:textSize="50sp"
+        android:shadowColor="@color/navigation_drawer_background_color"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
+        android:textColor="@color/navigation_drawer_text" />
+
+    <com.facebook.widget.LoginButton
+        android:id="@+id/facebook_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="onLoginButtonClicked"
+        android:layout_below="@id/centerDummyLay" />
+
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/show_other_options"
         android:id="@+id/chooseActionButton"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/facebook_button"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textColor="@color/navigation_drawer_text"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:background="@drawable/other_login_button"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Login via Facebook"
-        android:id="@+id/facebook_button"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="onLoginButtonClicked" />
 
 </RelativeLayout>
