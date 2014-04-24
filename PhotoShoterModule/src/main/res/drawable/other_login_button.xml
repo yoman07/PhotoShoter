@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><!-- http://fxrlabs.com/google/android-button-xml-drop-shadow/ -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="false">
+        <layer-list>
+            <!-- SHADOW -->
+            <item>
+                <shape>
+                    <solid android:color="#024f2b" />
+                    <corners android:radius="3dp" />
+                </shape>
+            </item>
+            <!-- BUTTON -->
+            <item android:bottom="1px">
+                <shape>
+                    <padding android:bottom="3dp" />
+                    <solid android:color="#037a42" />
+                    <corners android:radius="3dp" />
+                    <padding android:left="10dp" android:top="10dp" android:right="10dp" android:bottom="10dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <item android:state_pressed="true">
+        <layer-list>
+            <!-- SHADOW -->
+            <item>
+                <shape>
+                    <solid android:color="#024f2b" />
+                    <corners android:radius="3dp" />
+                </shape>
+            </item>
+            <!-- BUTTON -->
+            <item android:bottom="1px">
+                <shape>
+                    <padding android:bottom="3dp" />
+                    <solid android:color="#026035" />
+                    <corners android:radius="3dp" />
+                    <padding android:left="10dp" android:top="10dp" android:right="10dp" android:bottom="10dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>
