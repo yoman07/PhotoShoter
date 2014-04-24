@@ -21,11 +21,11 @@
         <activity
             android:name="com.photoshoter.LoginActivity"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateVisible"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateVisible" />
         <activity
             android:name="com.photoshoter.MainActivity"
-            android:label="@string/title_activity_main"></activity>
+            android:label="@string/title_activity_main" />
         <activity
             android:name="com.photoshoter.NonLoggedActivity"
             android:label="@string/app_name"
@@ -35,13 +35,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <service
             android:name="com.photoshoter.location.GeolocationService"
-            android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false"></service>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
