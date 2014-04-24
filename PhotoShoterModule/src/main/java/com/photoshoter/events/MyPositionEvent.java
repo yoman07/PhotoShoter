@@ -5,10 +5,10 @@ import android.location.Location;
 /**
  * Created by yoman on 24.04.2014.
  */
-public class PositionEvent {
+public class MyPositionEvent {
     private Location location;
 
-    public PositionEvent(Location location) {
+    public MyPositionEvent(Location location) {
         this.location = location;
     }
 
@@ -18,7 +18,7 @@ public class PositionEvent {
 
     @Override
     public String toString() {
-        return "PositionEvent{" +
+        return "MyPositionEvent{" +
                 "location=" + location +
                 '}';
     }

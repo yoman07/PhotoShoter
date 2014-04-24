@@ -13,7 +13,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.photoshoter.events.PositionEvent;
+import com.photoshoter.events.MyPositionEvent;
 
 import de.greenrobot.event.EventBus;
 
@@ -119,9 +119,8 @@ public class GeolocationService extends Service implements
                 Double.toString(location.getLongitude());
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 
-        EventBus.getDefault().post(new PositionEvent(location));
+        EventBus.getDefault().post(new MyPositionEvent(location));
 
-        //TODO:broadcast
     }
 
     @Override

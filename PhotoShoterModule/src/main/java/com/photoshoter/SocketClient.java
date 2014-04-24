@@ -1,79 +1,133 @@
 package com.photoshoter;
 
+import android.location.Location;
 import android.util.Log;
 
-import com.koushikdutta.async.AsyncSocket;
-import com.koushikdutta.async.callback.ConnectCallback;
-import com.koushikdutta.async.http.AsyncHttpClient;
-import com.koushikdutta.async.http.SocketIOClient;
-import com.photoshoter.events.PositionEvent;
 
-import org.json.JSONArray;
+import com.parse.ParseUser;
+import com.photoshoter.events.MyPositionEvent;
+import com.photoshoter.events.UserPositionEvent;
+import com.photoshoter.models.User;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+
 import de.greenrobot.event.EventBus;
+import io.socket.IOAcknowledge;
+import io.socket.IOCallback;
+import io.socket.SocketIO;
+import io.socket.SocketIOException;
 
 /**
  * Created by yoman on 23.04.2014.
  */
 public class SocketClient {
     private static final String TAG = "SocketClient";
-    private static String SERVER_ADRESS = "http://geo-chat.herokuapp.com:80";
-    private static SocketClient ourInstance = new SocketClient();
+    private static String SERVER_ADRESS = "http://geo-chat.herokuapp.com";
+    private static SocketClient ourInstance;
+    private static SocketIO socket;
 
     public static SocketClient getInstance() {
+        if (ourInstance == null) {
+            ourInstance = new SocketClient();
+        }
         return ourInstance;
     }
 
     private SocketClient() {
-
+        //EventBus.getDefault().register(this);
     }
 
-    public void connect() {
-        SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), SERVER_ADRESS, new SocketIOClient.SocketIOConnectCallback() {
+
+
+
+    public void connect() throws MalformedURLException {
+        this.socket = new SocketIO(SERVER_ADRESS);
+        socket.connect(new IOCallback() {
+            @Override
+            public void onMessage(JSONObject json, IOAcknowledge ack) {
+                try {
+                    Log.i(TAG, "Server said:" + json.toString(2));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
 
             @Override
-            public void onConnectCompleted(Exception e, SocketIOClient socketIOClient) {
-                if (e != null) {
-                    e.printStackTrace();
-                    return;
+            public void onMessage(String data, IOAcknowledge ack) {
+                Log.i(TAG, "Server said: " + data);
+            }
+
+            @Override
+            public void onError(SocketIOException socketIOException) {
+                Log.i(TAG, "an Error occured");
+                socketIOException.printStackTrace();
+            }
+
+            @Override
+            public void onDisconnect() {
+                System.out.println("Connection terminated.");
+            }
+
+            @Override
+            public void onConnect() {
+                Log.i(TAG, "Connection established");
+            }
+
+            @Override
+            public void on(String event, IOAcknowledge ack, Object... args) {
+                JSONObject json = (JSONObject)args[0];
+                if(event.equals("position_update")) {
+                    sendPositionUpdate(json);
                 }
-                EventBus.getDefault().register(this);
-                Log.i("SocketIOClient", "onConnectCompleted");
+                Log.i(TAG, "Server triggered event '" + event + "'" + args.toString());
 
-
-                socketIOClient.setEventCallback(new SocketIOClient.EventCallback() {
-
-                    @Override
-                    public void onEvent(String s, JSONArray jsonArray) {
-                        Log.i("SocketIOClient",s + " json: " + jsonArray.toString());
-                    }
-                });
-
-                socketIOClient.setStringCallback(new SocketIOClient.StringCallback() {
-                    @Override
-                    public void onString(String string) {
-                        Log.i("SocketIOClient",string);
-                    }
-                });
-
-                socketIOClient.setJSONCallback(new SocketIOClient.JSONCallback() {
-                    @Override
-                    public void onJSON(JSONObject json) {
-                        Log.i("SocketIOClient","json: " + json.toString());
-                    }
-                });
-
-
-
-                socketIOClient.emit("test");
             }
         });
 
+        JSONObject json = new JSONObject();
+        try {
+
+            ParseUser currentUser = ParseUser.getCurrentUser();
+
+            json.putOpt("nick", currentUser.getUsername());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        socket.emit("connect", json);
+
+
     }
 
-    public void onEvent(PositionEvent positionEvent) {
-        Log.i(TAG, positionEvent.toString());
+    private void sendPositionUpdate(JSONObject json) {
+        try {
+            String userName  = json.getString("user");
+            JSONObject positionJson = json.getJSONObject("position");
+
+            double latitude = positionJson.getInt("lat");
+            double longitude = positionJson.getInt("long");
+            Location loc = new Location("socketio");
+            loc.setLatitude(latitude);
+            loc.setLongitude(longitude);
+            EventBus.getDefault().post(new UserPositionEvent(new User(userName, loc)));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
+    public void onEvent(MyPositionEvent myPositionEvent) {
+        Log.i(TAG, myPositionEvent.toString());
+        JSONObject json = new JSONObject();
+        try {
+            json.putOpt("latitude", myPositionEvent.getLocation().getLatitude());
+            json.putOpt("longitude", myPositionEvent.getLocation().getLongitude());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        socket.emit("position_update", json);
+    }
 }
