@@ -35,6 +35,8 @@ public class NonLoggedActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        SocketClient.getInstance().connect();
+
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         printFacebookHash();
