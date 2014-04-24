@@ -29,5 +29,7 @@ dependencies {
 	compile 'com.android.support:support-v4:19.0.+'
 	compile 'com.android.support:appcompat-v7:19.0.+'
     compile 'com.joanzapata.android:android-iconify:1.+'
+    compile 'com.koushikdutta.androidasync:AndroidAsync:1.+'
     compile project(':libraries:facebook')
+    compile 'de.greenrobot:eventbus:2.2.0'
 }

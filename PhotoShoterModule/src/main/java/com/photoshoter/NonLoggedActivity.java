@@ -33,6 +33,7 @@ public class NonLoggedActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        SocketClient.getInstance().connect();
         printFacebookHash();
         Log.i("MainActivity", "test logowania");
         Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
