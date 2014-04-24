@@ -21,7 +21,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -58,14 +57,20 @@ public class CustomMarker {
 
         ImageView imgView = (ImageView) view.findViewById(R.id.profileImage);
         try {
-            URL img_value = new URL("https://graph.facebook.com/"+user.getFbId().toString()+"/?fields=picture");
+            URL img_value = new URL("https://graph.facebook.com/" + user.getFbId().toString() + "/?fields=picture");
             Picasso.with(ctx).load(getTrueFacebookPictureUrl(img_value)).error(R.drawable.com_facebook_profile_default_icon).placeholder(R.drawable.com_facebook_profile_default_icon).into(imgView);
         } catch (MalformedURLException e) {
             e.printStackTrace();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
+        //synchronization issue
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         //Provide it with a layout params. It should necessarily be wrapping the
         //content as we not really going to have a parent for it.
         view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -93,12 +98,13 @@ public class CustomMarker {
 
     /**
      * Method to return link to which fb graph is redirecting
+     *
      * @param url
      * @return
      */
-    private String getTrueFacebookPictureUrl(URL url){
+    private String getTrueFacebookPictureUrl(URL url) {
 
-        String returnValue="";
+        String returnValue = "";
         StringBuilder builder = new StringBuilder();
         HttpClient client = new DefaultHttpClient();
         HttpGet httpGet = new HttpGet(url.toString());
@@ -122,7 +128,7 @@ public class CustomMarker {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String responseJSON =  builder.toString();
+        String responseJSON = builder.toString();
         try {
             JSONObject jsonObject = new JSONObject(responseJSON);
             returnValue = jsonObject.getJSONObject("picture").getJSONObject("data").getString("url");
@@ -131,6 +137,6 @@ public class CustomMarker {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    return returnValue;
+        return returnValue;
     }
 }
