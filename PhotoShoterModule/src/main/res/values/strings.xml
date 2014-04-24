@@ -4,7 +4,7 @@
     <string name="app_name">PhotoShoter</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="title_activity_main">Photoshoter</string>
+    <string name="title_activity_main">PhotoShoter</string>
     <string name="title_section1">title 1</string>
     <string name="title_section2">title 2y</string>
     <string name="title_section3">title 3</string>
@@ -19,5 +19,6 @@
     <string name="login_text">Login</string>
     <string name="register_text">Register</string>
     <string name="action_logout_short">Logout</string>
-
+    <string name="gps_provider_title">GPS provider disabled</string>
+    <string name="gps_provider_body">Do you want to enable GPS provider to improve accuracy ?</string>
 </resources>
