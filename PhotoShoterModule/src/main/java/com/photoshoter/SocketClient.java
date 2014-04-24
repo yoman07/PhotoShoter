@@ -17,6 +17,7 @@ import de.greenrobot.event.EventBus;
  * Created by yoman on 23.04.2014.
  */
 public class SocketClient {
+    private static final String TAG = "SocketClient";
     private static String SERVER_ADRESS = "http://geo-chat.herokuapp.com:80";
     private static SocketClient ourInstance = new SocketClient();
 
@@ -72,7 +73,7 @@ public class SocketClient {
     }
 
     public void onEvent(PositionEvent positionEvent) {
-
+        Log.i(TAG, positionEvent.toString());
     }
 
 }

@@ -11,4 +11,15 @@ public class PositionEvent {
     public PositionEvent(Location location) {
         this.location = location;
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    @Override
+    public String toString() {
+        return "PositionEvent{" +
+                "location=" + location +
+                '}';
+    }
 }
