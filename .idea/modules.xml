@@ -8,7 +8,6 @@
       <module fileurl="file://$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" filepath="$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" />
       <module fileurl="file://$PROJECT_DIR$/ZdobywaczProject.iml" filepath="$PROJECT_DIR$/ZdobywaczProject.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/facebook/facebook.iml" filepath="$PROJECT_DIR$/libraries/facebook/facebook.iml" />
-      <module fileurl="file://$PROJECT_DIR$/photoshoter/photoshoter.iml" filepath="$PROJECT_DIR$/photoshoter/photoshoter.iml" />
     </modules>
   </component>
 </project>

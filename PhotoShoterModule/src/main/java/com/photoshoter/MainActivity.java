@@ -26,9 +26,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
+import com.photoshoter.events.PositionEvent;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.popups.MessagesWindow;
+
+import de.greenrobot.event.EventBus;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -88,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
         if (servicesConnected())
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
-
+        EventBus.getDefault().register(this);
     }
 
 
@@ -299,4 +302,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    public void onEvent(PositionEvent positionEvent) {
+
+    }
 }

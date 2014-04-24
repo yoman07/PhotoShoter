@@ -6,9 +6,12 @@ import com.koushikdutta.async.AsyncSocket;
 import com.koushikdutta.async.callback.ConnectCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.SocketIOClient;
+import com.photoshoter.events.PositionEvent;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by yoman on 23.04.2014.
@@ -34,6 +37,7 @@ public class SocketClient {
                     e.printStackTrace();
                     return;
                 }
+                EventBus.getDefault().register(this);
                 Log.i("SocketIOClient", "onConnectCompleted");
 
 
@@ -67,5 +71,8 @@ public class SocketClient {
 
     }
 
+    public void onEvent(PositionEvent positionEvent) {
+
+    }
 
 }
