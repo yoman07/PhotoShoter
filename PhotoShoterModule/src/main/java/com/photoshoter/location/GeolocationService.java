@@ -6,13 +6,14 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.photoshoter.events.PositionEvent;
+import com.photoshoter.events.MyPositionEvent;
 
 import de.greenrobot.event.EventBus;
 
@@ -28,6 +29,7 @@ public class GeolocationService extends Service implements
     private LocationRequest mLocationRequest;
     // Flag that indicates if a request is underway.
     private boolean mInProgress;
+
 
 
     @Override
@@ -112,7 +114,13 @@ public class GeolocationService extends Service implements
 
     @Override
     public void onLocationChanged(Location location) {
-        EventBus.getDefault().post(new PositionEvent(location));
+        String msg = "Updated Location: " +
+                Double.toString(location.getLatitude()) + "," +
+                Double.toString(location.getLongitude());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
+        EventBus.getDefault().post(new MyPositionEvent(location));
+
     }
 
     @Override

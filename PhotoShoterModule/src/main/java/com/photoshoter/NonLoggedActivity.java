@@ -35,7 +35,7 @@ public class NonLoggedActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        SocketClient.getInstance().connect();
+
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -61,9 +61,7 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         ParseFacebookUtils.initialize(getResources().getString(R.string.app_id));
 
-        ParseObject testObject = new ParseObject("TestObject");
-        testObject.put("foo", "bar");
-        testObject.saveInBackground();
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_non_logged);
