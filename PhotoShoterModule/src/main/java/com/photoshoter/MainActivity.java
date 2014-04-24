@@ -76,8 +76,6 @@ public class MainActivity extends ActionBarActivity {
             gpsChecked = false;
         }
 
-        setUpMapIfNeeded();
-
         if (!gpsChecked) {
             //check for gps provider
             LocationManager locationManager =
@@ -88,9 +86,11 @@ public class MainActivity extends ActionBarActivity {
 
         }
         //Check for Google Play Services apk
-        if (servicesConnected())
+        if (servicesConnected()) {
+            setUpMapIfNeeded();
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
+        }
         EventBus.getDefault().register(this);
     }
 
@@ -106,7 +106,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
     }
 
 
