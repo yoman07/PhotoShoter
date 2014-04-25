@@ -215,6 +215,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         finish();
     }
 
+
     @Override
     protected void onDestroy() {
         if (isMyServiceRunning())
@@ -358,6 +359,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             task.execute(new String[]{myFbId, lat, lng});
         }
     }
+
 
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
