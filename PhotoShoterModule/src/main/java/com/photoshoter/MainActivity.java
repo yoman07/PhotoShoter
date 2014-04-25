@@ -195,10 +195,12 @@ public class MainActivity extends ActionBarActivity {
         finish();
     }
 
+
     @Override
     protected void onDestroy() {
         if (isMyServiceRunning())
             stopService(new Intent(MainActivity.this, GeolocationService.class));
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
@@ -311,7 +313,7 @@ public class MainActivity extends ActionBarActivity {
 
 
     public void onEvent(MyPositionEvent myPositionEvent) {
-
+        Log.i(TAG, myPositionEvent.toString());
     }
 
     public void onEvent(UserPositionEvent userPositionEvent) {
