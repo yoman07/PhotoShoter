@@ -8,7 +8,7 @@ Contributors
 -------
 
 - [Bartłomiej Gołuszka aka `bbaloo`](https://github.com/bbaloo)
-- [Roman Barzyczak aka `yoman0`](https://github.com/yoman07)
+- [Roman Barzyczak aka `yoman07`](https://github.com/yoman07)
 
 License
 -------
