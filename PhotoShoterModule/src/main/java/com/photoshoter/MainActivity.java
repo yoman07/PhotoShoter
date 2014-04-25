@@ -39,10 +39,12 @@ import com.photoshoter.models.User;
 import com.photoshoter.popups.MessagesWindow;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {
 
 
     private static final String TAG = "MainActivity";
@@ -200,6 +202,8 @@ public class MainActivity extends ActionBarActivity {
             rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
             rlp.setMargins(10, 0, 0, 20);
 
+            mMap.setOnMarkerClickListener(this);
+
         }
     }
 
@@ -323,6 +327,15 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             }
         }
+        return false;
+    }
+
+
+    private Map<Integer, Marker> allMarkersMap = new HashMap<Integer, Marker>();
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        System.out.println("Marker cliked");
         return false;
     }
 
