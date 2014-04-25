@@ -337,6 +337,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
 
+
     public void onEvent(MyPositionEvent myPositionEvent) {
         if (markerMap.containsKey(myFbId)) {
             markerMap.get(myFbId).remove();
