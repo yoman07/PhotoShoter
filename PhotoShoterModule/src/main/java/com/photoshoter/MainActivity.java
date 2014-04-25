@@ -24,18 +24,13 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 import com.photoshoter.events.MyPositionEvent;
 import com.photoshoter.events.UserPositionEvent;
-import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
-import com.photoshoter.models.User;
 import com.photoshoter.popups.MessagesWindow;
 
 import java.net.MalformedURLException;
@@ -110,14 +105,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         }
         EventBus.getDefault().register(this);
 
-
-        LatLng MELBOURNE = new LatLng(-37.813, 144.962);
-        Marker melbourne = mMap.addMarker(new MarkerOptions()
-                .position(MELBOURNE)
-                .title("Melbourne")
-                .snippet("Population: 4,137,400")
-                .icon(BitmapDescriptorFactory.fromBitmap(new CustomMarker(new User("mi"), this).getCustomMarker())));
-
     }
 
 
@@ -155,14 +142,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
         switch (item.getItemId()) {
             case R.id.action_example:
-                //TODO: temporary - for tests only
-                menu.findItem(R.id.action_example).setIcon(
-                        new IconDrawable(this, Iconify.IconValue.fa_bell)
-                                .colorRes(R.color.actionbar_bell)
-                                .actionBarSize()
-                );
                 showMessagesWindow();
-
                 return true;
         }
         return super.onOptionsItemSelected(item);
