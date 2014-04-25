@@ -21,7 +21,6 @@ import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.security.MessageDigest;
@@ -34,7 +33,6 @@ public class NonLoggedActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
 
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -60,7 +58,6 @@ public class NonLoggedActivity extends ActionBarActivity {
         Parse.initialize(this, getResources().getString(R.string.PARSE_APPLICATION_ID), getResources().getString(R.string.PARSE_CLIENT_KEY));
 
         ParseFacebookUtils.initialize(getResources().getString(R.string.app_id));
-
 
 
         super.onCreate(savedInstanceState);
@@ -123,11 +120,20 @@ public class NonLoggedActivity extends ActionBarActivity {
                 if (user == null) {
                     Log.d("Log in",
                             "Uh oh. The user cancelled the Facebook login.");
-                } else if (user.isNew()) {
-                    Log.d("Log in",
-                            "User signed up and logged in through Facebook!");
-                    NonLoggedActivity.this.showUserLoggedActivity();
                 } else {
+                    getFacebookIdInBackground();
+                }
+            }
+        });
+    }
+
+    private void getFacebookIdInBackground() {
+        Request.executeMeRequestAsync(ParseFacebookUtils.getSession(), new Request.GraphUserCallback() {
+            @Override
+            public void onCompleted(GraphUser user, Response response) {
+                if (user != null) {
+                    ParseUser.getCurrentUser().put("fb_id", user.getId());
+                    ParseUser.getCurrentUser().saveInBackground();
                     Log.d("Log in",
                             "User logged in through Facebook!");
                     NonLoggedActivity.this.showUserLoggedActivity();

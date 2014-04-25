@@ -3,9 +3,9 @@ package com.photoshoter;
 import android.location.Location;
 import android.util.Log;
 
-
 import com.parse.ParseUser;
 import com.photoshoter.events.MyPositionEvent;
+import com.photoshoter.events.UserDisconnectEvent;
 import com.photoshoter.events.UserPositionEvent;
 import com.photoshoter.models.User;
 
@@ -37,10 +37,8 @@ public class SocketClient {
     }
 
     private SocketClient() {
-        //EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this);
     }
-
-
 
 
     public void connect() throws MalformedURLException {
@@ -78,9 +76,11 @@ public class SocketClient {
 
             @Override
             public void on(String event, IOAcknowledge ack, Object... args) {
-                JSONObject json = (JSONObject)args[0];
-                if(event.equals("position_update")) {
+                JSONObject json = (JSONObject) args[0];
+                if (event.equals("position_update")) {
                     sendPositionUpdate(json);
+                } else if (event.equals("close")) {
+                    sendUserDisconnect(json);
                 }
                 Log.i(TAG, "Server triggered event '" + event + "'" + args.toString());
 
@@ -91,8 +91,7 @@ public class SocketClient {
         try {
 
             ParseUser currentUser = ParseUser.getCurrentUser();
-
-            json.putOpt("nick", currentUser.getUsername());
+            json.putOpt("fb_id", currentUser.get("fb_id"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -102,17 +101,27 @@ public class SocketClient {
 
     }
 
+    private void sendUserDisconnect(JSONObject json) {
+        try {
+            String fbId = json.getString("fb_id");
+            EventBus.getDefault().post(new UserDisconnectEvent(fbId));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void sendPositionUpdate(JSONObject json) {
         try {
-            String userName  = json.getString("user");
+            String fbId = json.getString("fb_id");
             JSONObject positionJson = json.getJSONObject("position");
+
 
             double latitude = positionJson.getInt("lat");
             double longitude = positionJson.getInt("long");
             Location loc = new Location("socketio");
             loc.setLatitude(latitude);
             loc.setLongitude(longitude);
-            EventBus.getDefault().post(new UserPositionEvent(new User(userName, loc)));
+            EventBus.getDefault().post(new UserPositionEvent(new User(fbId, loc)));
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -33,16 +33,12 @@ import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.popups.MessagesWindow;
 
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
-
 import de.greenrobot.event.EventBus;
 
 public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {
 
-
     private static final String TAG = "MainActivity";
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private Menu menu;
@@ -75,11 +71,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            SocketClient.getInstance().connect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
         setContentView(R.layout.fragment_map);
 
         if (savedInstanceState != null) {
@@ -87,6 +78,8 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         } else {
             gpsChecked = false;
         }
+
+        setUpMapIfNeeded();
 
         if (!gpsChecked) {
             //check for gps provider
@@ -98,13 +91,11 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
         }
         //Check for Google Play Services apk
-        if (servicesConnected()) {
+        if (servicesConnected())
             setUpMapIfNeeded();
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
-        }
         EventBus.getDefault().register(this);
-
     }
 
 
@@ -142,7 +133,14 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
         switch (item.getItemId()) {
             case R.id.action_example:
+                //TODO: temporary - for tests only
+                menu.findItem(R.id.action_example).setIcon(
+                        new IconDrawable(this, Iconify.IconValue.fa_bell)
+                                .colorRes(R.color.actionbar_bell)
+                                .actionBarSize()
+                );
                 showMessagesWindow();
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -193,7 +191,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             stopService(new Intent(MainActivity.this, GeolocationService.class));
         finish();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -311,8 +308,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     }
 
 
-    private Map<Integer, Marker> allMarkersMap = new HashMap<Integer, Marker>();
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         System.out.println("Marker cliked");
@@ -321,10 +316,11 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
 
     public void onEvent(MyPositionEvent myPositionEvent) {
-        Log.i(TAG, myPositionEvent.toString());
+
     }
 
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
     }
+
 }

@@ -1,3 +1,8 @@
+/local.properties
+/.idea/workspace.xml
+.DS_Store
+/PhotoShoterModule/src/main/res/values/config.xml
+
 # built application files
 *.apk
 *.ap_
@@ -37,3 +42,4 @@ local.properties
 /.idea/workspace.xml
 .DS_Store
 /PhotoShoterModule/src/main/res/values/config.xml
+.idea
