@@ -123,11 +123,20 @@ public class NonLoggedActivity extends ActionBarActivity {
                 if (user == null) {
                     Log.d("Log in",
                             "Uh oh. The user cancelled the Facebook login.");
-                } else if (user.isNew()) {
-                    Log.d("Log in",
-                            "User signed up and logged in through Facebook!");
-                    NonLoggedActivity.this.showUserLoggedActivity();
                 } else {
+                    getFacebookIdInBackground();
+                }
+            }
+        });
+    }
+
+    private  void getFacebookIdInBackground() {
+        Request.executeMeRequestAsync(ParseFacebookUtils.getSession(), new Request.GraphUserCallback() {
+            @Override
+            public void onCompleted(GraphUser user, Response response) {
+                if (user != null) {
+                    ParseUser.getCurrentUser().put("fb_id", user.getId());
+                    ParseUser.getCurrentUser().saveInBackground();
                     Log.d("Log in",
                             "User logged in through Facebook!");
                     NonLoggedActivity.this.showUserLoggedActivity();

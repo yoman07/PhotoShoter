@@ -7,15 +7,15 @@ import android.location.Location;
  */
 public class User {
 
-    private String nick;
+    private String fbId;
     private Location location;
 
-    public User(String nick) {
-        this.nick = nick;
+    public User(String fbId) {
+        this.fbId = fbId;
     }
 
-    public User(String nick, Location location) {
-        this.nick = nick;
+    public User(String fbId, Location location) {
+        this.fbId = fbId;
         this.location = location;
     }
 
@@ -23,14 +23,14 @@ public class User {
         return location;
     }
 
-    public String getNick() {
-        return nick;
+    public String getFbId() {
+        return fbId;
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "nick='" + nick + '\'' +
+                "fbId='" + fbId + '\'' +
                 ", location=" + location +
                 '}';
     }
