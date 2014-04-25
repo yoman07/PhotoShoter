@@ -108,6 +108,7 @@ public class MainActivity extends ActionBarActivity {
         }
         EventBus.getDefault().register(this);
 
+
         LatLng MELBOURNE = new LatLng(-37.813, 144.962);
         Marker melbourne = mMap.addMarker(new MarkerOptions()
                 .position(MELBOURNE)
