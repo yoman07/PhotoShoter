@@ -116,14 +116,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                 startService(new Intent(MainActivity.this, GeolocationService.class));
         }
 
-
         try {
             SocketClient.getInstance().connect();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
         EventBus.getDefault().register(this);
-
     }
 
 
