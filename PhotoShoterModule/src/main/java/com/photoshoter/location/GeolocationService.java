@@ -6,7 +6,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -22,8 +21,6 @@ public class GeolocationService extends Service implements
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationListener {
 
-    private static final String TAG = "GeolocationService";
-
     public GeolocationService() {
     }
 
@@ -31,7 +28,6 @@ public class GeolocationService extends Service implements
     private LocationRequest mLocationRequest;
     // Flag that indicates if a request is underway.
     private boolean mInProgress;
-
 
 
     @Override
@@ -116,11 +112,7 @@ public class GeolocationService extends Service implements
 
     @Override
     public void onLocationChanged(Location location) {
-        String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-        Log.i(TAG, msg);
+
         EventBus.getDefault().post(new MyPositionEvent(location));
 
     }
@@ -137,9 +129,9 @@ public class GeolocationService extends Service implements
          */
         if (connectionResult.hasResolution()) {
 
-            Log.d(TAG, "Connection Failed with resolution");
+            Log.d("Geolocation Service", "Connection Failed with resolution");
         } else {
-            Log.d(TAG, "Connection Failed");
+            Log.d("Geolocation Service", "Connection Failed");
         }
     }
 }

@@ -3,8 +3,6 @@ package com.photoshoter;
 import android.location.Location;
 import android.util.Log;
 
-
-import com.parse.ParseFacebookUtils;
 import com.parse.ParseUser;
 import com.photoshoter.events.MyPositionEvent;
 import com.photoshoter.events.UserDisconnectEvent;
@@ -43,8 +41,6 @@ public class SocketClient {
     }
 
 
-
-
     public void connect() throws MalformedURLException {
         this.socket = new SocketIO(SERVER_ADRESS);
         socket.connect(new IOCallback() {
@@ -80,12 +76,12 @@ public class SocketClient {
 
             @Override
             public void on(String event, IOAcknowledge ack, Object... args) {
-                JSONObject json = (JSONObject)args[0];
-                if(event.equals("position_update")) {
+                JSONObject json = (JSONObject) args[0];
+                if (event.equals("position_update")) {
                     sendPositionUpdate(json);
-                } else if(event.equals("close")) {
+                } else if (event.equals("close")) {
                     sendUserDisconnect(json);
-                } 
+                }
                 Log.i(TAG, "Server triggered event '" + event + "'" + args.toString());
 
             }
@@ -95,7 +91,7 @@ public class SocketClient {
         try {
 
             ParseUser currentUser = ParseUser.getCurrentUser();
-            json.putOpt("fb_id",currentUser.get("fb_id"));
+            json.putOpt("fb_id", currentUser.get("fb_id"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -107,7 +103,7 @@ public class SocketClient {
 
     private void sendUserDisconnect(JSONObject json) {
         try {
-            String fbId  = json.getString("fb_id");
+            String fbId = json.getString("fb_id");
             EventBus.getDefault().post(new UserDisconnectEvent(fbId));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -116,9 +112,8 @@ public class SocketClient {
 
     private void sendPositionUpdate(JSONObject json) {
         try {
-            String fbId  = json.getString("fb_id");
+            String fbId = json.getString("fb_id");
             JSONObject positionJson = json.getJSONObject("position");
-
 
 
             double latitude = positionJson.getInt("lat");

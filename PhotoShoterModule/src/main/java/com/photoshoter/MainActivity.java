@@ -24,6 +24,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 import com.photoshoter.events.MyPositionEvent;
@@ -32,14 +33,12 @@ import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.popups.MessagesWindow;
 
-import java.net.MalformedURLException;
-
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends ActionBarActivity {
-
+public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = "MainActivity";
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private Menu menu;
@@ -72,11 +71,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            SocketClient.getInstance().connect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
         setContentView(R.layout.fragment_map);
 
         if (savedInstanceState != null) {
@@ -98,6 +92,7 @@ public class MainActivity extends ActionBarActivity {
         }
         //Check for Google Play Services apk
         if (servicesConnected())
+            setUpMapIfNeeded();
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
         EventBus.getDefault().register(this);
@@ -115,7 +110,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
     }
 
 
@@ -186,6 +180,8 @@ public class MainActivity extends ActionBarActivity {
             rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
             rlp.setMargins(10, 0, 0, 20);
 
+            mMap.setOnMarkerClickListener(this);
+
         }
     }
 
@@ -200,6 +196,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onDestroy() {
         if (isMyServiceRunning())
             stopService(new Intent(MainActivity.this, GeolocationService.class));
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
 
@@ -311,6 +308,13 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        System.out.println("Marker cliked");
+        return false;
+    }
+
+
     public void onEvent(MyPositionEvent myPositionEvent) {
 
     }
@@ -318,4 +322,5 @@ public class MainActivity extends ActionBarActivity {
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
     }
+
 }

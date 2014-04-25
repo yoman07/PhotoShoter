@@ -21,7 +21,6 @@ import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.security.MessageDigest;
@@ -34,7 +33,6 @@ public class NonLoggedActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
 
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -60,7 +58,6 @@ public class NonLoggedActivity extends ActionBarActivity {
         Parse.initialize(this, getResources().getString(R.string.PARSE_APPLICATION_ID), getResources().getString(R.string.PARSE_CLIENT_KEY));
 
         ParseFacebookUtils.initialize(getResources().getString(R.string.app_id));
-
 
 
         super.onCreate(savedInstanceState);
@@ -130,7 +127,7 @@ public class NonLoggedActivity extends ActionBarActivity {
         });
     }
 
-    private  void getFacebookIdInBackground() {
+    private void getFacebookIdInBackground() {
         Request.executeMeRequestAsync(ParseFacebookUtils.getSession(), new Request.GraphUserCallback() {
             @Override
             public void onCompleted(GraphUser user, Response response) {
