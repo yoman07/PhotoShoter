@@ -11,7 +11,9 @@ import java.util.Map;
  */
 public class UserDataProvider {
 
+
     private static UserDataProvider instance;
+
 
     public static UserDataProvider getInstance() {
         if (instance == null) {
@@ -19,6 +21,7 @@ public class UserDataProvider {
         }
         return instance;
     }
+
 
     private Map<String, User> users = new LinkedHashMap<String, User>();
     private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
@@ -74,6 +77,5 @@ public class UserDataProvider {
     public void addMarkerIcon(String fb_id, Bitmap icon) {
         markerIcon.put(fb_id, icon);
     }
-
 
 }

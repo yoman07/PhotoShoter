@@ -42,7 +42,6 @@ import com.photoshoter.location.LocationUtils;
 import com.photoshoter.models.User;
 import com.photoshoter.models.UserDataProvider;
 import com.photoshoter.popups.MessagesWindow;
-
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;

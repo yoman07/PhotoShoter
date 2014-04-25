@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 
 import com.photoshoter.R;
 import com.photoshoter.models.User;
+
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.HttpEntity;
@@ -29,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 
 /**
  * Created by balu on 2014-04-25.
@@ -55,6 +57,7 @@ public class CustomMarker {
         RelativeLayout view = new RelativeLayout(ctx);
         mInflater.inflate(R.layout.marker_layout, view, true);
 
+
         ImageView imgView = (ImageView) view.findViewById(R.id.profileImage);
         try {
             URL img_value = new URL("https://graph.facebook.com/" + user.getFbId().toString() + "/?fields=picture");
@@ -71,6 +74,7 @@ public class CustomMarker {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         //Provide it with a layout params. It should necessarily be wrapping the
         //content as we not really going to have a parent for it.
         view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -95,6 +99,7 @@ public class CustomMarker {
         return bitmap;
 
     }
+
 
     /**
      * Method to return link to which fb graph is redirecting
