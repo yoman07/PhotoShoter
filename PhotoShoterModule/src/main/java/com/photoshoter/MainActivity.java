@@ -28,10 +28,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 import com.photoshoter.events.MyPositionEvent;
+import com.photoshoter.events.UserDisconnectEvent;
 import com.photoshoter.events.UserPositionEvent;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.popups.MessagesWindow;
+
+import java.net.MalformedURLException;
 
 import de.greenrobot.event.EventBus;
 
@@ -95,6 +98,11 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             setUpMapIfNeeded();
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
+        try {
+            SocketClient.getInstance().connect();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         EventBus.getDefault().register(this);
     }
 
@@ -322,5 +330,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
     }
+
+
 
 }
