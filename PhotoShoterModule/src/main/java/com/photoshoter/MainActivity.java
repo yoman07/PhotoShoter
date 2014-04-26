@@ -10,8 +10,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -41,13 +43,11 @@ import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.models.User;
-import com.photoshoter.models.UserDataProvider;
 import com.photoshoter.popups.MessagesWindow;
+
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-
-import java.net.MalformedURLException;
 
 import de.greenrobot.event.EventBus;
 
@@ -61,7 +61,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private boolean gpsChecked;
 
-    private Handler handler = new Handler();
+    private Handler handler;
 
     private String myFbId;
 
@@ -112,6 +112,8 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                 showGpsAlertDialog().show();
 
         }
+
+        handler = new Handler(Looper.getMainLooper());
         //Check for Google Play Services apk
         if (servicesConnected()) {
             setUpMapIfNeeded();
@@ -339,31 +341,53 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     }
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
+    private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
 
+    private void moveMarker(final String userId, final LatLng latlng, final boolean delete) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (delete) {
+                    markerMap.get(userId).remove();
+                    markerMap.remove(userId);
+                } else {
+                    if (markerMap.containsKey(userId)) {
+                        markerMap.get(userId).remove();
+                        Marker newMarker = mMap.addMarker(new MarkerOptions()
+                                .position(latlng)
+                                .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(userId))));
+                        markerMap.put(userId, newMarker);
+
+
+                    } else if (!markerIcon.containsKey(userId)) {
+                        markerIcon.put(userId, null);
+                        DownloadMarkerImage task = new DownloadMarkerImage();
+                        String lat = String.valueOf(latlng.latitude);
+                        String lng = String.valueOf(latlng.longitude);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (new String[]{userId, lat, lng}));
+                        } else {
+                            task.execute(new String[]{userId, lat, lng});
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     public void onEvent(MyPositionEvent myPositionEvent) {
-        if (markerMap.containsKey(myFbId)) {
-            markerMap.get(myFbId).remove();
-            markerMap.remove(myFbId);
-            Marker newMarker = mMap.addMarker(new MarkerOptions()
-                    .position(myPositionEvent.getLatLng())
-                    .icon(BitmapDescriptorFactory.fromBitmap(UserDataProvider.getInstance().getMarkerIcon(myFbId))));
-            markerMap.put(myFbId, newMarker);
-
-
-        } else if (!UserDataProvider.getInstance().isMarkerIconStored(myFbId)) {
-
-            UserDataProvider.getInstance().addMarkerIcon(myFbId, null);
-            DownloadMarkerImage task = new DownloadMarkerImage();
-            String lat = String.valueOf(myPositionEvent.getLocation().getLatitude());
-            String lng = String.valueOf(myPositionEvent.getLocation().getLongitude());
-            task.execute(new String[]{myFbId, lat, lng});
-        }
+        moveMarker(myFbId, myPositionEvent.getLatLng(), false);
     }
 
 
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
+        moveMarker(userPositionEvent.getUser().getFbId(), userPositionEvent.getUser().getLatLng(), false);
+    }
+
+    public void onEvent(UserDisconnectEvent userDisconnectEvent) {
+        String userId = userDisconnectEvent.getFbId();
+        moveMarker(userId, null, true);
     }
 
     private class DownloadMarkerImage extends AsyncTask<String, Void, Bitmap> {
@@ -388,7 +412,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             Marker newMarker = mMap.addMarker(new MarkerOptions()
                     .position(latLng)
                     .icon(BitmapDescriptorFactory.fromBitmap(result)));
-            UserDataProvider.getInstance().addMarkerIcon(userId, result);
+            markerIcon.put(userId, result);
             markerMap.put(userId, newMarker);
         }
     }
