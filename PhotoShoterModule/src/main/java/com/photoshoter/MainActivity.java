@@ -24,13 +24,19 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
+import com.parse.ParseUser;
 import com.photoshoter.events.MyPositionEvent;
 import com.photoshoter.events.UserPositionEvent;
+import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
+import com.photoshoter.models.User;
 import com.photoshoter.popups.MessagesWindow;
 
 import de.greenrobot.event.EventBus;
@@ -96,6 +102,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
         EventBus.getDefault().register(this);
+
+        LatLng MELBOURNE = new LatLng(-37.813, 144.962);
+        Marker melbourne = mMap.addMarker(new MarkerOptions()
+                .position(MELBOURNE)
+                .title("Melbourne")
+                .snippet("Population: 4,137,400")
+                .icon(BitmapDescriptorFactory.fromBitmap(new CustomMarker(new User("100001099431149"), this).getCustomMarker())));
     }
 
 
@@ -310,8 +323,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        System.out.println("Marker cliked");
-        return false;
+            return false;
     }
 
 
@@ -323,4 +335,4 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         Log.i(TAG, userPositionEvent.toString());
     }
 
-}
+    }
