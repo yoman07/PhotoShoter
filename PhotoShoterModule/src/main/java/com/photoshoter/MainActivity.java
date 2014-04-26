@@ -43,6 +43,7 @@ import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.models.User;
+import com.photoshoter.models.UserDataProvider;
 import com.photoshoter.popups.MessagesWindow;
 
 import java.net.MalformedURLException;
@@ -65,7 +66,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private String myFbId;
 
+    UserDataProvider usrDP;
 
+    private boolean isSocketOpen;
+
+    private Map<String, Marker> markerMap = new HashMap<String, Marker>();
+    private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
 
     /**
      * Dialog window to inform about Google Play services apk
@@ -94,13 +100,17 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_map);
 
+        usrDP = UserDataProvider.getInstance();
+
         if (savedInstanceState != null) {
             gpsChecked = savedInstanceState.getBoolean("gpsChecked");
             myFbId = savedInstanceState.getString("myFbId");
+            isSocketOpen = savedInstanceState.getBoolean("isSocketOpen");
         } else {
             gpsChecked = false;
             ParseUser currentUser = ParseUser.getCurrentUser();
             myFbId = currentUser.get("fb_id").toString();
+            isSocketOpen = false;
         }
 
         if (!gpsChecked) {
@@ -117,14 +127,21 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         //Check for Google Play Services apk
         if (servicesConnected()) {
             setUpMapIfNeeded();
+
+            if (!usrDP.isMarkerMapEmpty()) {
+                recreateMarkers();
+            }
             if (!isMyServiceRunning())
                 startService(new Intent(MainActivity.this, GeolocationService.class));
         }
 
-        try {
-            SocketClient.getInstance().connect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if (!isSocketOpen) {
+            try {
+                SocketClient.getInstance().connect();
+                isSocketOpen = true;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
         EventBus.getDefault().register(this);
     }
@@ -175,6 +192,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         super.onSaveInstanceState(outState);
         outState.putBoolean("gpsChecked", gpsChecked);
         outState.putString("myFbId", myFbId);
+        outState.putBoolean("isSocketOpen", isSocketOpen);
     }
 
 
@@ -214,6 +232,11 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     public void onBackPressed() {
         if (isMyServiceRunning())
             stopService(new Intent(MainActivity.this, GeolocationService.class));
+        usrDP.clearMarkerIconMap();
+        usrDP.clearMarkerMap();
+        SocketClient.getInstance().disconnectFromServer();
+        isSocketOpen = false;
+
         finish();
     }
 
@@ -223,6 +246,10 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         if (isMyServiceRunning())
             stopService(new Intent(MainActivity.this, GeolocationService.class));
         EventBus.getDefault().unregister(this);
+        usrDP.clearMarkerIconMap();
+        usrDP.clearMarkerMap();
+        usrDP.markerIconMapAddItems(markerIcon);
+        usrDP.markerMapAddItems(markerMap);
         super.onDestroy();
     }
 
@@ -340,18 +367,20 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         return false;
     }
 
-    private Map<String, Marker> markerMap = new HashMap<String, Marker>();
-    private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
 
     private void moveMarker(final String userId, final LatLng latlng, final boolean delete) {
         handler.post(new Runnable() {
             @Override
             public void run() {
                 if (delete) {
-                    markerMap.get(userId).remove();
+                    try {
+                        markerMap.get(userId).remove();
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
                     markerMap.remove(userId);
                 } else {
-                    if (markerMap.containsKey(userId)) {
+                    if (markerMap.containsKey(userId) && markerIcon.containsKey(userId)) {
                         markerMap.get(userId).remove();
                         Marker newMarker = mMap.addMarker(new MarkerOptions()
                                 .position(latlng)
@@ -359,7 +388,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                         markerMap.put(userId, newMarker);
 
 
-                    } else if (!markerIcon.containsKey(userId)) {
+                    } else if (!markerMap.containsKey(userId) && !markerIcon.containsKey(userId)) {
                         markerIcon.put(userId, null);
                         DownloadMarkerImage task = new DownloadMarkerImage();
                         String lat = String.valueOf(latlng.latitude);
@@ -369,8 +398,36 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                         } else {
                             task.execute(new String[]{userId, lat, lng});
                         }
+                    } else if (!markerMap.containsKey(userId) && markerIcon.containsKey(userId)) {
+                        Marker newMarker = mMap.addMarker(new MarkerOptions()
+                                .position(latlng)
+                                .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(userId))));
+                        markerMap.put(userId, newMarker);
                     }
                 }
+            }
+        });
+    }
+
+    private void recreateMarkers() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<String, Bitmap> entry : usrDP.returnMarkerIconMap().entrySet()) {
+                    String key = entry.getKey();
+                    Bitmap value = entry.getValue();
+                    markerIcon.put(key, value);
+                }
+                usrDP.clearMarkerIconMap();
+                for (Map.Entry<String, Marker> entry : usrDP.returnMarkerMap().entrySet()) {
+                    String key = entry.getKey();
+                    Marker value = entry.getValue();
+                    Marker newMarker = mMap.addMarker(new MarkerOptions()
+                            .position(value.getPosition())
+                            .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(key))));
+                    markerMap.put(key, newMarker);
+                }
+                usrDP.clearMarkerMap();
             }
         });
     }

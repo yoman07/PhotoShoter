@@ -20,7 +20,7 @@ import com.photoshoter.models.Message;
  */
 public class MessagesWindow extends DialogFragment {
 
-    public MessagesWindow(){
+    public MessagesWindow() {
 
     }
 
@@ -40,13 +40,13 @@ public class MessagesWindow extends DialogFragment {
         View view = inflater.inflate(R.layout.messages_window, container);
 
         mListAdapter = new MessagesListAdapter(getActivity());
-        mListView = (ListView)view.findViewById(R.id.messageslistView);
+        mListView = (ListView) view.findViewById(R.id.messageslistView);
         mListView.setAdapter(mListAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            dismiss();
+                dismiss();
             }
         });
 
@@ -54,28 +54,20 @@ public class MessagesWindow extends DialogFragment {
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         height = displaymetrics.heightPixels;
         width = displaymetrics.widthPixels;
-        width = width - width/12;
-        height = height - height/8;
+        width = width - width / 12;
+        height = height - height / 8;
 
-        mListAdapter.addItem(new Message());
-        mListAdapter.addItem(new Message());
-        mListAdapter.addItem(new Message());
-        mListAdapter.addItem(new Message());
-        mListAdapter.addItem(new Message());
-        mListAdapter.addItem(new Message());
-        mListAdapter.addItem(new Message());
         mListAdapter.addItem(new Message());
 
         return view;
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
 
         Window window = getDialog().getWindow();
         window.setLayout(width, height);
         window.setGravity(Gravity.CENTER);
-      }
+    }
 }

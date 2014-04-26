@@ -127,6 +127,11 @@ public class SocketClient {
         }
     }
 
+    public void disconnectFromServer() {
+        socket.disconnect();
+        ourInstance = null;
+    }
+
     public void onEvent(MyPositionEvent myPositionEvent) {
         Log.i(TAG, myPositionEvent.toString());
         JSONObject json = new JSONObject();
