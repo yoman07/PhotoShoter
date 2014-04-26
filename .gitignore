@@ -41,5 +41,7 @@ local.properties
 /local.properties
 /.idea/workspace.xml
 .DS_Store
+
 /PhotoShoterModule/src/main/res/values/config.xml
 .idea
+
