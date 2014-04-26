@@ -35,6 +35,7 @@ import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 import com.parse.ParseUser;
 import com.photoshoter.events.MyPositionEvent;
+import com.photoshoter.events.UserDisconnectEvent;
 import com.photoshoter.events.UserPositionEvent;
 import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
@@ -45,6 +46,8 @@ import com.photoshoter.popups.MessagesWindow;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+
+import java.net.MalformedURLException;
 
 import de.greenrobot.event.EventBus;
 
@@ -362,7 +365,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
     }
-
 
     private class DownloadMarkerImage extends AsyncTask<String, Void, Bitmap> {
 
