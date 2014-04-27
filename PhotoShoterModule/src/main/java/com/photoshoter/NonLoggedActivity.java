@@ -125,13 +125,13 @@ public class NonLoggedActivity extends ActionBarActivity {
             @Override
             public void done(ParseUser user, ParseException err) {
 
-
                 if (user == null) {
                     Log.d("Log in",
                             "Uh oh. The user cancelled the Facebook login.");
                 } else {
                     getFacebookIdInBackground();
                 }
+                NonLoggedActivity.this.progressDialog.dismiss();
             }
         });
     }
@@ -161,7 +161,6 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        NonLoggedActivity.this.progressDialog.dismiss();
         finish();
     }
 

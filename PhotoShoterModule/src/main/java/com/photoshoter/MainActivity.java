@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -66,13 +67,15 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private boolean gpsChecked;
 
+    private boolean isSocketOpen;
+
+    private boolean firstLaunch;
+
     private Handler handler;
 
     private String myFbId;
 
     MarkerHolder markerHolder;
-
-    private boolean isSocketOpen;
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
     private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
@@ -110,11 +113,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             gpsChecked = savedInstanceState.getBoolean("gpsChecked");
             myFbId = savedInstanceState.getString("myFbId");
             isSocketOpen = savedInstanceState.getBoolean("isSocketOpen");
+            firstLaunch = savedInstanceState.getBoolean("firstLaunch");
         } else {
             gpsChecked = false;
             ParseUser currentUser = ParseUser.getCurrentUser();
             myFbId = currentUser.get("fb_id").toString();
             isSocketOpen = false;
+            firstLaunch = true;
         }
 
         if (!gpsChecked) {
@@ -197,6 +202,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         outState.putBoolean("gpsChecked", gpsChecked);
         outState.putString("myFbId", myFbId);
         outState.putBoolean("isSocketOpen", isSocketOpen);
+        outState.putBoolean("firstLaunch", firstLaunch);
     }
 
 
@@ -439,6 +445,11 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     }
 
     public void onEvent(MyPositionEvent myPositionEvent) {
+        if (firstLaunch) {
+            firstLaunch = false;
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myPositionEvent.getLatLng(),
+                    12.0f));
+        }
         moveMarker(myFbId, myPositionEvent.getLatLng(), false);
     }
 

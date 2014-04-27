@@ -12,7 +12,6 @@ import android.widget.RelativeLayout;
 
 import com.photoshoter.R;
 import com.photoshoter.models.User;
-
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.HttpEntity;
@@ -70,7 +69,7 @@ public class CustomMarker {
 
         //synchronization issue
         try {
-            Thread.sleep(2000);
+            Thread.sleep(2500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
