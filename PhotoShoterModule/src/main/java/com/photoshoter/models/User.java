@@ -2,6 +2,8 @@ package com.photoshoter.models;
 
 import android.location.Location;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by balu on 2014-04-24.
  */
@@ -21,6 +23,11 @@ public class User {
 
     public Location getLocation() {
         return location;
+    }
+
+    public LatLng getLatLng() {
+        LatLng newLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        return newLatLng;
     }
 
     public String getFbId() {

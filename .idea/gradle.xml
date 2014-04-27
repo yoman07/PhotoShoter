@@ -7,11 +7,11 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/PhotoShoterModule" />
-            <option value="$PROJECT_DIR$/libraries" />
-            <option value="$PROJECT_DIR$/libraries/facebook" />
-            <option value="$PROJECT_DIR$/photoshoter" />
+            <option value="C:\Users\Bartłomiej\Documents\GitHub\PhotoShoter" />
+            <option value="C:\Users\Bartłomiej\Documents\GitHub\PhotoShoter\PhotoShoterModule" />
+            <option value="C:\Users\Bartłomiej\Documents\GitHub\PhotoShoter\libraries" />
+            <option value="C:\Users\Bartłomiej\Documents\GitHub\PhotoShoter\libraries\facebook" />
+            <option value="C:\Users\Bartłomiej\Documents\GitHub\PhotoShoter\photoshoter" />
           </set>
         </option>
       </GradleProjectSettings>

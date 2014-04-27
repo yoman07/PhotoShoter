@@ -143,8 +143,8 @@ public class SocketClient {
             JSONObject positionJson = json.getJSONObject("position");
 
 
-            double latitude = positionJson.getInt("lat");
-            double longitude = positionJson.getInt("long");
+            double latitude = positionJson.getDouble("lat");
+            double longitude = positionJson.getDouble("long");
             Location loc = new Location("socketio");
             loc.setLatitude(latitude);
             loc.setLongitude(longitude);
@@ -152,6 +152,11 @@ public class SocketClient {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void disconnectFromServer() {
+        socket.disconnect();
+        ourInstance = null;
     }
 
     public void onEvent(MyPositionEvent myPositionEvent) {
