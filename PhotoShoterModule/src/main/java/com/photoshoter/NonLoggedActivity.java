@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Window;
 
 import com.facebook.LoggingBehavior;
@@ -81,6 +82,15 @@ public class NonLoggedActivity extends ActionBarActivity {
         }
 
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            // do nothing to prevent NullPointerException caused by this.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private void printFacebookHash() {
