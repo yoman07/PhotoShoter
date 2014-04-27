@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -47,9 +46,8 @@ import com.photoshoter.helpers.ImageHelper;
 import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
-import com.photoshoter.models.MyUserData;
+import com.photoshoter.location.MarkerHolder;
 import com.photoshoter.models.User;
-import com.photoshoter.models.UserDataProvider;
 import com.photoshoter.popups.MessagesWindow;
 
 import java.net.MalformedURLException;
@@ -72,7 +70,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private String myFbId;
 
-    UserDataProvider usrDP;
+    MarkerHolder markerHolder;
 
     private boolean isSocketOpen;
 
@@ -106,7 +104,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_map);
 
-        usrDP = UserDataProvider.getInstance();
+        markerHolder = MarkerHolder.getInstance();
 
         if (savedInstanceState != null) {
             gpsChecked = savedInstanceState.getBoolean("gpsChecked");
@@ -134,7 +132,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         if (servicesConnected()) {
             setUpMapIfNeeded();
 
-            if (!usrDP.isMarkerMapEmpty()) {
+            if (!markerHolder.isMarkerMapEmpty()) {
                 recreateMarkers();
             }
             if (!isMyServiceRunning())
@@ -238,8 +236,8 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     public void onBackPressed() {
         if (isMyServiceRunning())
             stopService(new Intent(MainActivity.this, GeolocationService.class));
-        usrDP.clearMarkerIconMap();
-        usrDP.clearMarkerMap();
+        markerHolder.clearMarkerIconMap();
+        markerHolder.clearMarkerMap();
         SocketClient.getInstance().disconnectFromServer();
         isSocketOpen = false;
 
@@ -252,10 +250,10 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         if (isMyServiceRunning())
             stopService(new Intent(MainActivity.this, GeolocationService.class));
         EventBus.getDefault().unregister(this);
-        usrDP.clearMarkerIconMap();
-        usrDP.clearMarkerMap();
-        usrDP.markerIconMapAddItems(markerIcon);
-        usrDP.markerMapAddItems(markerMap);
+        markerHolder.clearMarkerIconMap();
+        markerHolder.clearMarkerMap();
+        markerHolder.markerIconMapAddItems(markerIcon);
+        markerHolder.markerMapAddItems(markerMap);
         super.onDestroy();
     }
 
@@ -405,10 +403,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                             task.execute(new String[]{userId, lat, lng});
                         }
                     } else if (!markerMap.containsKey(userId) && markerIcon.containsKey(userId)) {
-                        Marker newMarker = mMap.addMarker(new MarkerOptions()
-                                .position(latlng)
-                                .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(userId))));
-                        markerMap.put(userId, newMarker);
+                        if (markerIcon.get(userId) != null) {
+                            Marker newMarker = mMap.addMarker(new MarkerOptions()
+                                    .position(latlng)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(userId))));
+                            markerMap.put(userId, newMarker);
+                        }
                     }
                 }
             }
@@ -419,13 +419,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         handler.post(new Runnable() {
             @Override
             public void run() {
-                for (Map.Entry<String, Bitmap> entry : usrDP.returnMarkerIconMap().entrySet()) {
+                for (Map.Entry<String, Bitmap> entry : markerHolder.returnMarkerIconMap().entrySet()) {
                     String key = entry.getKey();
                     Bitmap value = entry.getValue();
                     markerIcon.put(key, value);
                 }
-                usrDP.clearMarkerIconMap();
-                for (Map.Entry<String, Marker> entry : usrDP.returnMarkerMap().entrySet()) {
+                markerHolder.clearMarkerIconMap();
+                for (Map.Entry<String, Marker> entry : markerHolder.returnMarkerMap().entrySet()) {
                     String key = entry.getKey();
                     Marker value = entry.getValue();
                     Marker newMarker = mMap.addMarker(new MarkerOptions()
@@ -433,7 +433,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                             .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(key))));
                     markerMap.put(key, newMarker);
                 }
-                usrDP.clearMarkerMap();
+                markerHolder.clearMarkerMap();
             }
         });
     }

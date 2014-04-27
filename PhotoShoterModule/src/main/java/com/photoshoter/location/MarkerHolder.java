@@ -1,4 +1,4 @@
-package com.photoshoter.models;
+package com.photoshoter.location;
 
 import android.graphics.Bitmap;
 
@@ -10,15 +10,15 @@ import java.util.Map;
 /**
  * Created by balu on 2014-04-25.
  */
-public class UserDataProvider {
+public class MarkerHolder {
 
 
-    private static UserDataProvider instance;
+    private static MarkerHolder instance;
 
 
-    public static UserDataProvider getInstance() {
+    public static MarkerHolder getInstance() {
         if (instance == null) {
-            instance = new UserDataProvider();
+            instance = new MarkerHolder();
         }
         return instance;
     }
