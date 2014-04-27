@@ -124,7 +124,6 @@ public class NonLoggedActivity extends ActionBarActivity {
         ParseFacebookUtils.logIn(permissions, NonLoggedActivity.this, new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException err) {
-                NonLoggedActivity.this.progressDialog.dismiss();
 
 
                 if (user == null) {
@@ -162,6 +161,7 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        NonLoggedActivity.this.progressDialog.dismiss();
         finish();
     }
 
