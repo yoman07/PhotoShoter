@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Window;
 
 import com.facebook.LoggingBehavior;
@@ -83,6 +84,15 @@ public class NonLoggedActivity extends ActionBarActivity {
 
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            // do nothing to prevent NullPointerException caused by this.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     private void printFacebookHash() {
         // Add code to print out the key hash
         try {
@@ -114,7 +124,6 @@ public class NonLoggedActivity extends ActionBarActivity {
         ParseFacebookUtils.logIn(permissions, NonLoggedActivity.this, new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException err) {
-                NonLoggedActivity.this.progressDialog.dismiss();
 
 
                 if (user == null) {
@@ -152,6 +161,7 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        NonLoggedActivity.this.progressDialog.dismiss();
         finish();
     }
 

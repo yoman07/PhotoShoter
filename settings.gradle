@@ -1,1 +1,1 @@
-include ':libraries:facebook', 'photoshoter', 'PhotoShoterModule'
+include ':libraries:facebook', 'PhotoShoterModule'
