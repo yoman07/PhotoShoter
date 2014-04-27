@@ -3,10 +3,12 @@ package com.photoshoter;
 import android.location.Location;
 import android.util.Log;
 
-import com.parse.ParseUser;
+import com.photoshoter.events.ImageEvent;
+import com.photoshoter.events.MyImageEvent;
 import com.photoshoter.events.MyPositionEvent;
 import com.photoshoter.events.UserDisconnectEvent;
 import com.photoshoter.events.UserPositionEvent;
+import com.photoshoter.models.MyUserData;
 import com.photoshoter.models.User;
 
 import org.json.JSONException;
@@ -78,9 +80,11 @@ public class SocketClient {
             public void on(String event, IOAcknowledge ack, Object... args) {
                 JSONObject json = (JSONObject) args[0];
                 if (event.equals("position_update")) {
-                    sendPositionUpdate(json);
+                    receivedPositionUpdate(json);
                 } else if (event.equals("close")) {
-                    sendUserDisconnect(json);
+                    receivedUserDisconnect(json);
+                } else if(event.equals("photo_received")) {
+                    receivedPhoto(json);
                 }
                 Log.i(TAG, "Server triggered event '" + event + "'" + args.toString());
 
@@ -89,9 +93,7 @@ public class SocketClient {
 
         JSONObject json = new JSONObject();
         try {
-
-            ParseUser currentUser = ParseUser.getCurrentUser();
-            json.putOpt("fb_id", currentUser.get("fb_id"));
+            json.putOpt("user_id", MyUserData.getUserId());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -101,18 +103,43 @@ public class SocketClient {
 
     }
 
-    private void sendUserDisconnect(JSONObject json) {
+    private void receivedPhoto(JSONObject json) {
         try {
-            String fbId = json.getString("fb_id");
+            String fbId = json.getString("user_id");
+            JSONObject positionJson = json.getJSONObject("position");
+
+
+            double latitude = positionJson.getInt("latitude");
+            double longitude = positionJson.getInt("longitude");
+
+            Location loc = new Location("socketio");
+            loc.setLatitude(latitude);
+            loc.setLongitude(longitude);
+
+            String base64image = json.getString("image");
+
+            ImageEvent imageEvent = new ImageEvent(fbId,loc,base64image);
+            EventBus.getDefault().post(imageEvent);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void receivedUserDisconnect(JSONObject json) {
+        try {
+            String fbId = json.getString("user_id");
             EventBus.getDefault().post(new UserDisconnectEvent(fbId));
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void sendPositionUpdate(JSONObject json) {
+    private void receivedPositionUpdate(JSONObject json) {
         try {
-            String fbId = json.getString("fb_id");
+            String fbId = json.getString("user_id");
             JSONObject positionJson = json.getJSONObject("position");
 
 
@@ -139,4 +166,22 @@ public class SocketClient {
 
         socket.emit("position_update", json);
     }
+
+    public void onEvent(MyImageEvent myImageEvent) {
+        Log.i(TAG, "Got image event" + myImageEvent.toString());
+        JSONObject json = new JSONObject();
+        JSONObject locationObject = new JSONObject();
+        try {
+            locationObject.put("latitude", myImageEvent.getLocation().getLatitude());
+            locationObject.put("longitude", myImageEvent.getLocation().getLongitude());
+            json.put("location", locationObject);
+            json.put("user_id", MyUserData.getUserId());
+            json.put("image", myImageEvent.getBase64image());
+            socket.emit("send_photo", json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
