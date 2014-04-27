@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -36,12 +38,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
 import com.parse.ParseUser;
+import com.photoshoter.events.ImageEvent;
+import com.photoshoter.events.MyImageEvent;
 import com.photoshoter.events.MyPositionEvent;
 import com.photoshoter.events.UserDisconnectEvent;
 import com.photoshoter.events.UserPositionEvent;
+import com.photoshoter.helpers.ImageHelper;
 import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
+import com.photoshoter.models.MyUserData;
 import com.photoshoter.models.User;
 import com.photoshoter.models.UserDataProvider;
 import com.photoshoter.popups.MessagesWindow;
@@ -437,6 +443,11 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     }
 
 
+    private void sendImageEvent(Bitmap bm, Location location, String receiverId) {
+            MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm),location, receiverId);
+            EventBus.getDefault().post(imageEvent);
+    }
+
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
         moveMarker(userPositionEvent.getUser().getFbId(), userPositionEvent.getUser().getLatLng(), false);
@@ -446,6 +457,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         String userId = userDisconnectEvent.getFbId();
         moveMarker(userId, null, true);
     }
+
+    public  void onEvent(ImageEvent imageEvent) {
+        Log.i(TAG, "Got imageEvent with data" + imageEvent.toString());
+        Bitmap bitmap = ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image());
+        Log.i(TAG, "Bitmap " + bitmap.toString());
+    }
+
 
     private class DownloadMarkerImage extends AsyncTask<String, Void, Bitmap> {
 

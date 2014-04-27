@@ -10,12 +10,14 @@ import com.parse.codec.binary.Base64;
 public class MyImageEvent {
     private String base64image;
     private Location location;
+    private String receiverId;
 
-    public MyImageEvent(String base64image, Location location) throws IllegalArgumentException {
+    public MyImageEvent(String base64image, Location location, String receiverId) throws IllegalArgumentException {
         boolean isBase64 = Base64.isBase64(base64image);
         if(isBase64) {
             this.base64image = base64image;
             this.location = location;
+            this.receiverId =receiverId;
         } else {
             throw new IllegalArgumentException("Incorrect base64image format");
         }
@@ -27,6 +29,10 @@ public class MyImageEvent {
 
     public Location getLocation() {
         return location;
+    }
+
+    public String getReceiverId() {
+        return receiverId;
     }
 
     @Override

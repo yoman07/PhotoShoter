@@ -45,6 +45,7 @@ public class SocketClient {
 
     public void connect() throws MalformedURLException {
         this.socket = new SocketIO(SERVER_ADRESS);
+
         socket.connect(new IOCallback() {
             @Override
             public void onMessage(JSONObject json, IOAcknowledge ack) {
@@ -64,6 +65,7 @@ public class SocketClient {
             public void onError(SocketIOException socketIOException) {
                 Log.i(TAG, "an Error occured");
                 socketIOException.printStackTrace();
+                socket.reconnect();
             }
 
             @Override
@@ -160,6 +162,7 @@ public class SocketClient {
     }
 
     public void onEvent(MyPositionEvent myPositionEvent) {
+        checkConnectionAndReconnectIfDisconnect();
         Log.i(TAG, myPositionEvent.toString());
         JSONObject json = new JSONObject();
         try {
@@ -173,20 +176,25 @@ public class SocketClient {
     }
 
     public void onEvent(MyImageEvent myImageEvent) {
+        checkConnectionAndReconnectIfDisconnect();
         Log.i(TAG, "Got image event" + myImageEvent.toString());
         JSONObject json = new JSONObject();
         JSONObject locationObject = new JSONObject();
         try {
             locationObject.put("latitude", myImageEvent.getLocation().getLatitude());
             locationObject.put("longitude", myImageEvent.getLocation().getLongitude());
-            json.put("location", locationObject);
-            json.put("user_id", MyUserData.getUserId());
+            json.put("position", locationObject);
+            json.put("user_id", myImageEvent.getReceiverId());
             json.put("image", myImageEvent.getBase64image());
-            socket.emit("send_photo", json);
+            this.socket.emit("send_photo", json);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-
+    private void checkConnectionAndReconnectIfDisconnect() {
+        if(this.socket != null && !this.socket.isConnected()) {
+            this.socket.reconnect();
+        }
+    }
 }
