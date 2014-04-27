@@ -2,13 +2,41 @@
 PhotoShoter
 ===========
 
-Application for sending photo to users on map.
+Application for sending photo to users on map. Server for this application: https://github.com/yoman07/geo-server 
 
 Contributors
 -------
 
 - [Bartłomiej Gołuszka aka `bbaloo`](https://github.com/bbaloo)
 - [Roman Barzyczak aka `yoman07`](https://github.com/yoman07)
+
+Events
+-------
+
+####Getting images
+
+For getting images you need subscribe to Bus with method: `public  void onEvent(ImageEvent imageEvent)` , `imageEvent` contain method `getLocation()` - positon where image was made, `getBase64image()` - base64 image, you can convert it by using `ImageHelper.bitmapFromBase64Format(base64String)`, `getSenderId` - method for get user id, who made a photo.
+
+Example:
+```
+public  void onEvent(ImageEvent imageEvent) {
+        Log.i(TAG, "Got imageEvent with data" + imageEvent.toString());
+        Bitmap bitmap = ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image());
+        Log.i(TAG, "Bitmap " + bitmap.toString());
+    }
+```
+
+####Sending images
+
+You can sending image to specific user by post event `MyImageEvent` which containt `base64image` - image in base64 format ( you can convert bitmap to base64 by using `ImageHelper.base64FormatFromBitmap(bm)` ), `receiverId` - user who should receive image
+
+```
+    private void sendImageEvent(Bitmap bm, Location location, String receiverId) {
+            MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm),location, receiverId);
+            EventBus.getDefault().post(imageEvent);
+    }
+```
+
 
 License
 -------
