@@ -43,23 +43,8 @@
         android:layout_marginRight="20dp"
         android:layout_centerHorizontal="true"
         android:onClick="onLoginButtonClicked"
-        android:layout_below="@id/centerDummyLay" />
-
-
-    <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/show_other_options"
-        android:id="@+id/chooseActionButton"
-        android:layout_below="@+id/facebook_button"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:textColor="@color/navigation_drawer_text"
-        android:textStyle="bold"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:background="@drawable/other_login_button"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dp" />
 
 
 </RelativeLayout>
