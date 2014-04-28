@@ -11,7 +11,6 @@
             <option value="$PROJECT_DIR$/PhotoShoterModule" />
             <option value="$PROJECT_DIR$/libraries" />
             <option value="$PROJECT_DIR$/libraries/facebook" />
-            <option value="$PROJECT_DIR$/photoshoter" />
           </set>
         </option>
       </GradleProjectSettings>

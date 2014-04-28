@@ -194,7 +194,11 @@ public class SocketClient {
 
     private void checkConnectionAndReconnectIfDisconnect() {
         if(this.socket != null && !this.socket.isConnected()) {
-            this.socket.reconnect();
+            try {
+                this.socket.reconnect();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
