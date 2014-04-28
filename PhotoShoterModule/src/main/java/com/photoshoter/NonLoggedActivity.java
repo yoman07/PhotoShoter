@@ -56,9 +56,7 @@ public class NonLoggedActivity extends ActionBarActivity {
         });
         request.executeAsync();
 
-        Parse.initialize(this, getResources().getString(R.string.PARSE_APPLICATION_ID), getResources().getString(R.string.PARSE_CLIENT_KEY));
 
-        ParseFacebookUtils.initialize(getResources().getString(R.string.app_id));
 
 
         super.onCreate(savedInstanceState);
@@ -161,7 +159,9 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        NonLoggedActivity.this.progressDialog.dismiss();
+        if(this.progressDialog != null) {
+            NonLoggedActivity.this.progressDialog.dismiss();
+        }
         finish();
     }
 
