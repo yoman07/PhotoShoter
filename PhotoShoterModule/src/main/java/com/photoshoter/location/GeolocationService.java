@@ -64,7 +64,11 @@ public class GeolocationService extends Service implements
     public void onDestroy() {
         mInProgress = false;
         if (mLocationClient != null) {
-            mLocationClient.removeLocationUpdates(this);
+            try {
+                mLocationClient.removeLocationUpdates(this);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
             // Destroy the current location client
             mLocationClient = null;
         }
@@ -99,7 +103,8 @@ public class GeolocationService extends Service implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        mLocationClient.requestLocationUpdates(mLocationRequest, this);
+        if (mLocationClient != null)
+            mLocationClient.requestLocationUpdates(mLocationRequest, this);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.photoshoter.location;
 
 import android.graphics.Bitmap;
+import android.location.Location;
 
 import com.google.android.gms.maps.model.Marker;
 
@@ -26,22 +27,22 @@ public class MarkerHolder {
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
     private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
 
+    private Location myLocation = null;
+
+    public void setMyLocation(Location loc) {
+        myLocation = loc;
+    }
+
+    public Location getMyLocation() {
+        return myLocation;
+    }
 
     public void markerMapAddItems(Map<String, Marker> map) {
-
-        for (Map.Entry<String, Marker> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Marker value = entry.getValue();
-            markerMap.put(key, value);
-        }
+        markerMap.putAll(map);
     }
 
     public void markerIconMapAddItems(Map<String, Bitmap> map) {
-        for (Map.Entry<String, Bitmap> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Bitmap value = entry.getValue();
-            markerIcon.put(key, value);
-        }
+        markerIcon.putAll(map);
     }
 
     public Map<String, Marker> returnMarkerMap() {
@@ -70,6 +71,10 @@ public class MarkerHolder {
         if (markerIcon.size() > 0)
             return false;
         return true;
+    }
+
+    public Bitmap getMarkerIcon(String fb_id) {
+        return markerIcon.get(fb_id);
     }
 
 }
