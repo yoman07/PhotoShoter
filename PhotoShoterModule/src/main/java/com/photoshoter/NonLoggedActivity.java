@@ -56,9 +56,7 @@ public class NonLoggedActivity extends ActionBarActivity {
         });
         request.executeAsync();
 
-        Parse.initialize(this, getResources().getString(R.string.PARSE_APPLICATION_ID), getResources().getString(R.string.PARSE_CLIENT_KEY));
 
-        ParseFacebookUtils.initialize(getResources().getString(R.string.app_id));
 
 
         super.onCreate(savedInstanceState);
@@ -125,13 +123,13 @@ public class NonLoggedActivity extends ActionBarActivity {
             @Override
             public void done(ParseUser user, ParseException err) {
 
+
                 if (user == null) {
                     Log.d("Log in",
                             "Uh oh. The user cancelled the Facebook login.");
                 } else {
                     getFacebookIdInBackground();
                 }
-                NonLoggedActivity.this.progressDialog.dismiss();
             }
         });
     }
@@ -161,6 +159,9 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        if(this.progressDialog != null) {
+            NonLoggedActivity.this.progressDialog.dismiss();
+        }
         finish();
     }
 

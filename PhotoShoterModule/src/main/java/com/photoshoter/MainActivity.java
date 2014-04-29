@@ -53,6 +53,7 @@ import com.photoshoter.location.CustomMarker;
 import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.location.MarkerHolder;
+import com.photoshoter.models.MyUserData;
 import com.photoshoter.models.User;
 import com.photoshoter.models.UserDataProvider;
 import com.photoshoter.popups.ImageViewer;
@@ -142,8 +143,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             notyficationFlag = savedInstanceState.getBoolean("notyficationFlag");
         } else {
             gpsChecked = false;
-            ParseUser currentUser = ParseUser.getCurrentUser();
-            myFbId = currentUser.get("fb_id").toString();
+            myFbId = MyUserData.getUserId();
             isSocketOpen = false;
             firstLaunch = true;
             notyficationFlag = false;
