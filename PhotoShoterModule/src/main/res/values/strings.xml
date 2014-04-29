@@ -19,6 +19,10 @@
     <string name="login_text">Login</string>
     <string name="register_text">Register</string>
     <string name="action_logout_short">Logout</string>
-    <string name="gps_provider_title">GPS provider disabled</string>
-    <string name="gps_provider_body">Do you want to enable GPS provider to improve accuracy ?</string>
+    <string name="gps_provider_title">Odbiornik GPS wyłączony</string>
+    <string name="gps_provider_body">Czy chcesz włączyć odbiornik GPS ?</string>
+    <string name="take_picture">Wyślij zdjęcie</string>
+    <string name="open_picture">Otwórz zdjęcie</string>
+    <string name="only_you">To ty</string>
+    <string name="nothing">Nic tu nie ma :(</string>
 </resources>

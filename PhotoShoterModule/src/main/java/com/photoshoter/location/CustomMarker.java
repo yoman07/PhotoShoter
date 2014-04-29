@@ -69,7 +69,7 @@ public class CustomMarker {
 
         //synchronization issue
         try {
-            Thread.sleep(2500);
+            Thread.sleep(3500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -125,7 +125,7 @@ public class CustomMarker {
                     builder.append(line);
                 }
             } else {
-                Log.e("", "Failed to download file");
+                Log.e("", "Failed to fetch");
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -143,4 +143,6 @@ public class CustomMarker {
         }
         return returnValue;
     }
+
+
 }

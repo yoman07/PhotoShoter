@@ -10,11 +10,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -25,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -49,8 +54,22 @@ import com.photoshoter.location.GeolocationService;
 import com.photoshoter.location.LocationUtils;
 import com.photoshoter.location.MarkerHolder;
 import com.photoshoter.models.User;
-import com.photoshoter.popups.MessagesWindow;
+import com.photoshoter.models.UserDataProvider;
+import com.photoshoter.popups.ImageViewer;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +82,8 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
     private Menu menu;
 
     private boolean gpsChecked;
@@ -71,11 +92,15 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private boolean firstLaunch;
 
+    public boolean notyficationFlag;
+
     private Handler handler;
 
     private String myFbId;
 
-    MarkerHolder markerHolder;
+    private String receiverId;
+
+    private MarkerHolder markerHolder;
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
     private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
@@ -114,12 +139,14 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             myFbId = savedInstanceState.getString("myFbId");
             isSocketOpen = savedInstanceState.getBoolean("isSocketOpen");
             firstLaunch = savedInstanceState.getBoolean("firstLaunch");
+            notyficationFlag = savedInstanceState.getBoolean("notyficationFlag");
         } else {
             gpsChecked = false;
             ParseUser currentUser = ParseUser.getCurrentUser();
             myFbId = currentUser.get("fb_id").toString();
             isSocketOpen = false;
             firstLaunch = true;
+            notyficationFlag = false;
         }
 
         if (!gpsChecked) {
@@ -133,6 +160,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         }
 
         handler = new Handler(Looper.getMainLooper());
+
         //Check for Google Play Services apk
         if (servicesConnected()) {
             setUpMapIfNeeded();
@@ -153,6 +181,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             }
         }
         EventBus.getDefault().register(this);
+
     }
 
 
@@ -175,11 +204,19 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
         getMenuInflater().inflate(R.menu.main, menu);
         this.menu = menu;
-        menu.findItem(R.id.action_example).setIcon(
-                new IconDrawable(this, Iconify.IconValue.fa_bell_o)
-                        .colorRes(R.color.navigation_drawer_text)
-                        .actionBarSize()
-        );
+        if (!notyficationFlag) {
+            menu.findItem(R.id.action_example).setIcon(
+                    new IconDrawable(this, Iconify.IconValue.fa_bell_o)
+                            .colorRes(R.color.navigation_drawer_text)
+                            .actionBarSize()
+            );
+        } else {
+            menu.findItem(R.id.action_example).setIcon(
+                    new IconDrawable(getApplicationContext(), Iconify.IconValue.fa_bell)
+                            .colorRes(R.color.actionbar_bell)
+                            .actionBarSize()
+            );
+        }
         restoreActionBar();
 
         return super.onCreateOptionsMenu(menu);
@@ -190,7 +227,16 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
         switch (item.getItemId()) {
             case R.id.action_example:
-                showMessagesWindow();
+                item.setIcon(
+                        new IconDrawable(this, Iconify.IconValue.fa_bell_o)
+                                .colorRes(R.color.navigation_drawer_text)
+                                .actionBarSize()
+                );
+
+                if (markerMap.containsKey(UserDataProvider.getInstance().getIdOfPhotoSender())) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerMap.get(UserDataProvider.getInstance().getIdOfPhotoSender()).getPosition(), 12.0f));
+                }
+                notyficationFlag = false;
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -205,15 +251,33 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         outState.putBoolean("firstLaunch", firstLaunch);
     }
 
+    @Override
+    public void onBackPressed() {
 
-    /**
-     * Opens Dialog with received messages
-     */
-    private void showMessagesWindow() {
-        FragmentManager fm = getSupportFragmentManager();
-        MessagesWindow messagesWindowDialog = new MessagesWindow();
-        messagesWindowDialog.show(fm, "fragment_messages_window");
+        if (isMyServiceRunning())
+            stopService(new Intent(MainActivity.this, GeolocationService.class));
+        markerHolder.clearMarkerIconMap();
+        markerHolder.clearMarkerMap();
+        SocketClient.getInstance().disconnectFromServer();
+        isSocketOpen = false;
+        notyficationFlag = false;
+        UserDataProvider.getInstance().removeCurrenPhoto();
+        finish();
     }
+
+
+    @Override
+    protected void onDestroy() {
+        if (isMyServiceRunning())
+            stopService(new Intent(MainActivity.this, GeolocationService.class));
+        EventBus.getDefault().unregister(this);
+        markerHolder.clearMarkerIconMap();
+        markerHolder.clearMarkerMap();
+        markerHolder.markerIconMapAddItems(markerIcon);
+        markerHolder.markerMapAddItems(markerMap);
+        super.onDestroy();
+    }
+
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -234,33 +298,8 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             rlp.setMargins(10, 0, 0, 20);
 
             mMap.setOnMarkerClickListener(this);
-
         }
-    }
 
-    @Override
-    public void onBackPressed() {
-        if (isMyServiceRunning())
-            stopService(new Intent(MainActivity.this, GeolocationService.class));
-        markerHolder.clearMarkerIconMap();
-        markerHolder.clearMarkerMap();
-        SocketClient.getInstance().disconnectFromServer();
-        isSocketOpen = false;
-
-        finish();
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        if (isMyServiceRunning())
-            stopService(new Intent(MainActivity.this, GeolocationService.class));
-        EventBus.getDefault().unregister(this);
-        markerHolder.clearMarkerIconMap();
-        markerHolder.clearMarkerMap();
-        markerHolder.markerIconMapAddItems(markerIcon);
-        markerHolder.markerMapAddItems(markerMap);
-        super.onDestroy();
     }
 
     /**
@@ -314,6 +353,15 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                         Log.d("Google Play Services", "Unknown Problem");
                         break;
                 }
+            case REQUEST_IMAGE_CAPTURE:
+                if (resultCode == RESULT_OK) {
+                    Bundle extras = data.getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    if (imageBitmap != null && markerMap.containsKey(receiverId)) {
+                        sendImageEvent(imageBitmap, MarkerHolder.getInstance().getMyLocation(), receiverId);
+                    }
+
+                }
 
                 // If any other request code was received
             default:
@@ -323,6 +371,14 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                 break;
         }
 
+    }
+
+    private void dispatchTakePictureIntent(String receiverId) {
+        this.receiverId = receiverId;
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
     }
 
     private boolean servicesConnected() {
@@ -373,8 +429,49 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        System.out.println("Marker cliked");
-        return false;
+        if (marker.getTitle().equals(myFbId)) {
+            Toast.makeText(this, R.string.only_you, Toast.LENGTH_SHORT).show();
+        } else {
+            chooseMarkerAction(marker.getTitle());
+        }
+        return true;
+    }
+
+    private void chooseMarkerAction(final String fb_id) {
+        CharSequence actionOptions[] = new CharSequence[]{getString(R.string.take_picture), getString(R.string.open_picture)};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(UserDataProvider.getInstance().getUserName(fb_id));
+        builder.setItems(actionOptions, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        dispatchTakePictureIntent(fb_id);
+                        break;
+                    case 1:
+                        if (fb_id.equals(UserDataProvider.getInstance().getIdOfPhotoSender())) {
+                            UserDataProvider.getInstance().setLock();
+                            menu.findItem(R.id.action_example).setIcon(
+                                    new IconDrawable(getApplicationContext(), Iconify.IconValue.fa_bell_o)
+                                            .colorRes(R.color.navigation_drawer_text)
+                                            .actionBarSize()
+                            );
+                            notyficationFlag = false;
+                            FragmentManager fm = getSupportFragmentManager();
+                            ImageViewer imageViewerWindow = new ImageViewer();
+                            imageViewerWindow.show(fm, "fragment_image_window");
+
+                        } else {
+                            Toast.makeText(getApplicationContext(), R.string.nothing, Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                }
+            }
+
+
+        });
+        builder.show();
     }
 
 
@@ -394,6 +491,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                         markerMap.get(userId).remove();
                         Marker newMarker = mMap.addMarker(new MarkerOptions()
                                 .position(latlng)
+                                .title(userId)
                                 .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(userId))));
                         markerMap.put(userId, newMarker);
 
@@ -412,6 +510,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                         if (markerIcon.get(userId) != null) {
                             Marker newMarker = mMap.addMarker(new MarkerOptions()
                                     .position(latlng)
+                                    .title(userId)
                                     .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(userId))));
                             markerMap.put(userId, newMarker);
                         }
@@ -425,24 +524,20 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         handler.post(new Runnable() {
             @Override
             public void run() {
-                for (Map.Entry<String, Bitmap> entry : markerHolder.returnMarkerIconMap().entrySet()) {
-                    String key = entry.getKey();
-                    Bitmap value = entry.getValue();
-                    markerIcon.put(key, value);
-                }
+                markerIcon.putAll(markerHolder.returnMarkerIconMap());
                 markerHolder.clearMarkerIconMap();
                 for (Map.Entry<String, Marker> entry : markerHolder.returnMarkerMap().entrySet()) {
-                    String key = entry.getKey();
-                    Marker value = entry.getValue();
                     Marker newMarker = mMap.addMarker(new MarkerOptions()
-                            .position(value.getPosition())
-                            .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(key))));
-                    markerMap.put(key, newMarker);
+                            .position(entry.getValue().getPosition())
+                            .title(entry.getValue().getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(markerIcon.get(entry.getKey()))));
+                    markerMap.put(entry.getKey(), newMarker);
                 }
                 markerHolder.clearMarkerMap();
             }
         });
     }
+
 
     public void onEvent(MyPositionEvent myPositionEvent) {
         if (firstLaunch) {
@@ -450,6 +545,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myPositionEvent.getLatLng(),
                     12.0f));
         }
+        if (!UserDataProvider.getInstance().isUserInUserMap(myFbId)) {
+            UserDataProvider.getInstance().addUser(myFbId, null);
+            FetchUserNameFromFb task = new FetchUserNameFromFb();
+            task.execute(new String[]{myFbId});
+        }
+        MarkerHolder.getInstance().setMyLocation(myPositionEvent.getLocation());
         moveMarker(myFbId, myPositionEvent.getLatLng(), false);
     }
 
@@ -461,6 +562,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     public void onEvent(UserPositionEvent userPositionEvent) {
         Log.i(TAG, userPositionEvent.toString());
+        if (!UserDataProvider.getInstance().isUserInUserMap(userPositionEvent.getUser().getFbId())) {
+            UserDataProvider.getInstance().addUser(userPositionEvent.getUser().getFbId(), null);
+            //Temporary solution - server should send 'user is online' event with user data
+            FetchUserNameFromFb task = new FetchUserNameFromFb();
+            task.execute(new String[]{userPositionEvent.getUser().getFbId()});
+        }
         moveMarker(userPositionEvent.getUser().getFbId(), userPositionEvent.getUser().getLatLng(), false);
     }
 
@@ -471,8 +578,36 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     public  void onEvent(ImageEvent imageEvent) {
         Log.i(TAG, "Got imageEvent with data" + imageEvent.toString());
-        Bitmap bitmap = ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image());
-        Log.i(TAG, "Bitmap " + bitmap.toString());
+        if (!UserDataProvider.getInstance().isLock()) {
+            UserDataProvider.getInstance().holdReceivedBitmap(imageEvent.getSenderId(), ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image()));
+            if (!notyficationFlag && markerMap.containsKey(imageEvent.getSenderId())) {
+                notifyUserAboutNewMessage();
+            }
+        }
+    }
+
+    private void notifyUserAboutNewMessage() {
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+
+                menu.findItem(R.id.action_example).setIcon(
+                        new IconDrawable(getApplicationContext(), Iconify.IconValue.fa_bell)
+                                .colorRes(R.color.actionbar_bell)
+                                .actionBarSize()
+                );
+                notyficationFlag = true;
+
+                try {
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                    r.play();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 
@@ -497,9 +632,62 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             LatLng latLng = new LatLng(lat, lng);
             Marker newMarker = mMap.addMarker(new MarkerOptions()
                     .position(latLng)
+                    .title(userId)
                     .icon(BitmapDescriptorFactory.fromBitmap(result)));
             markerIcon.put(userId, result);
             markerMap.put(userId, newMarker);
+        }
+    }
+
+    private class FetchUserNameFromFb extends AsyncTask<String, Void, String> {
+
+        String fb_id;
+
+        @Override
+        protected String doInBackground(String... params) {
+            fb_id = params[0];
+            String returnValue = "";
+            StringBuilder builder = new StringBuilder();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet("https://graph.facebook.com/" + fb_id + "?fields=name");
+            try {
+                HttpResponse response = client.execute(httpGet);
+                StatusLine statusLine = response.getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode == 200) {
+                    HttpEntity entity = response.getEntity();
+                    InputStream content = entity.getContent();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+                } else {
+                    Log.e("", "Failed to check");
+                }
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            String responseJSON = builder.toString();
+            try {
+                JSONObject jsonObject = new JSONObject(responseJSON);
+                returnValue = jsonObject.get("name").toString();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return returnValue;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (s != null) {
+                String[] splited = s.split("\\s+");
+                UserDataProvider.getInstance().addUser(fb_id, splited[0]);
+            }
+
         }
     }
 
