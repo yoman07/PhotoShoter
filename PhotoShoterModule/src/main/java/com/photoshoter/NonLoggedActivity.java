@@ -19,7 +19,6 @@ import com.facebook.Response;
 import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 import com.parse.LogInCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
 import com.parse.ParseUser;
@@ -159,7 +158,7 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        if(this.progressDialog != null) {
+        if (this.progressDialog != null) {
             NonLoggedActivity.this.progressDialog.dismiss();
         }
         finish();

@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
@@ -42,7 +43,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
-import com.parse.ParseUser;
 import com.photoshoter.events.ImageEvent;
 import com.photoshoter.events.MyImageEvent;
 import com.photoshoter.events.MyPositionEvent;
@@ -68,6 +68,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,22 +81,14 @@ import de.greenrobot.event.EventBus;
 
 public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {
 
-    private static final String TAG = "MainActivity";
-
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
     static final int REQUEST_IMAGE_CAPTURE = 1;
-
-    private Menu menu;
-
-    private boolean gpsChecked;
-
-    private boolean isSocketOpen;
-
-    private boolean firstLaunch;
-
+    private static final String TAG = "MainActivity";
     public boolean notyficationFlag;
-
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private Menu menu;
+    private boolean gpsChecked;
+    private boolean isSocketOpen;
+    private boolean firstLaunch;
     private Handler handler;
 
     private String myFbId;
@@ -105,28 +99,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
     private Map<String, Bitmap> markerIcon = new HashMap<String, Bitmap>();
-
-    /**
-     * Dialog window to inform about Google Play services apk
-     */
-    public static class ErrorDialogFragment extends DialogFragment {
-
-        private Dialog mDialog;
-
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,7 +156,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     }
 
-
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -192,12 +163,10 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         actionBar.setTitle(R.string.app_name);
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -261,10 +230,10 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         SocketClient.getInstance().disconnectFromServer();
         isSocketOpen = false;
         notyficationFlag = false;
+        deleteImage();
         UserDataProvider.getInstance().removeCurrenPhoto();
         finish();
     }
-
 
     @Override
     protected void onDestroy() {
@@ -277,7 +246,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         markerHolder.markerMapAddItems(markerMap);
         super.onDestroy();
     }
-
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -312,13 +280,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.gps_provider_title)
                 .setMessage(R.string.gps_provider_body)
-                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(settingsIntent);
                     }
                 })
-                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
                     }
@@ -355,6 +323,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                 }
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK) {
+                    //TODO: work on quality improvement
                     Bundle extras = data.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
                     if (imageBitmap != null && markerMap.containsKey(receiverId)) {
@@ -426,7 +395,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         return false;
     }
 
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker.getTitle().equals(myFbId)) {
@@ -473,7 +441,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         });
         builder.show();
     }
-
 
     private void moveMarker(final String userId, final LatLng latlng, final boolean delete) {
         handler.post(new Runnable() {
@@ -538,7 +505,6 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         });
     }
 
-
     public void onEvent(MyPositionEvent myPositionEvent) {
         if (firstLaunch) {
             firstLaunch = false;
@@ -554,10 +520,9 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         moveMarker(myFbId, myPositionEvent.getLatLng(), false);
     }
 
-
     private void sendImageEvent(Bitmap bm, Location location, String receiverId) {
-            MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm),location, receiverId);
-            EventBus.getDefault().post(imageEvent);
+        MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm), location, receiverId);
+        EventBus.getDefault().post(imageEvent);
     }
 
     public void onEvent(UserPositionEvent userPositionEvent) {
@@ -576,10 +541,10 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         moveMarker(userId, null, true);
     }
 
-    public  void onEvent(ImageEvent imageEvent) {
+    public void onEvent(ImageEvent imageEvent) {
         Log.i(TAG, "Got imageEvent with data" + imageEvent.toString());
         if (!UserDataProvider.getInstance().isLock()) {
-            UserDataProvider.getInstance().holdReceivedBitmap(imageEvent.getSenderId(), ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image()));
+            UserDataProvider.getInstance().holdReceivedBitmap(imageEvent.getSenderId(), getPictureUri(ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image())));
             if (!notyficationFlag && markerMap.containsKey(imageEvent.getSenderId())) {
                 notifyUserAboutNewMessage();
             }
@@ -610,6 +575,71 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         });
     }
 
+    private synchronized Uri getPictureUri(Bitmap bmp) {
+
+        File APP_FILE_PATH = new File(Environment.getExternalStorageDirectory()
+                .getPath() + "/" + getString(R.string.app_name) + "/");
+        if (!APP_FILE_PATH.exists()) {
+            APP_FILE_PATH.mkdirs();
+        }
+
+        File file = new File(APP_FILE_PATH, "image.png");
+        Uri imageFileUri = Uri.fromFile(file);
+
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(file, false);
+            bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (Throwable ignore) {
+            }
+        }
+        return imageFileUri;
+    }
+
+    private void deleteImage() {
+
+        try {
+            File file = new File(UserDataProvider.getInstance().getCurrentPhoto().getPath());
+            if (file.exists()) {
+                if (file.delete()) {
+                    Log.i(TAG, "file deleted");
+                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                            Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                } else {
+                    Log.i(TAG, "file not deleted");
+                }
+            }
+        } catch (NullPointerException e) {
+            Log.i(TAG, "file not found");
+        }
+    }
+
+    /**
+     * Dialog window to inform about Google Play services apk
+     */
+    public static class ErrorDialogFragment extends DialogFragment {
+
+        private Dialog mDialog;
+
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
+        }
+    }
 
     private class DownloadMarkerImage extends AsyncTask<String, Void, Bitmap> {
 
