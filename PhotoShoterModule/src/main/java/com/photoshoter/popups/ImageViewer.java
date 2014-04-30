@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.IconTextView;
 import android.widget.ImageView;
 
 import com.photoshoter.R;
@@ -37,6 +38,7 @@ public class ImageViewer extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(STYLE_NO_FRAME, getActivity().getApplicationInfo().theme);
+        setCancelable(false);
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         screenHeight = displaymetrics.heightPixels;
@@ -49,9 +51,16 @@ public class ImageViewer extends DialogFragment {
                              Bundle savedInstanceState) {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         View view = inflater.inflate(R.layout.image_viever_layout, container);
+        IconTextView txtv = (IconTextView) view.findViewById(R.id.textViewCancel);
+        txtv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserDataProvider.getInstance().releaseLock();
+                dismiss();
+            }
+        });
         ImageView imgView = (ImageView) view.findViewById(R.id.imageViewFullScreen);
 
-        //Picasso.with(getActivity()).load(UserDataProvider.getInstance().getCurrentPhoto()).fit().centerCrop().into(imgView);
 
         Bitmap bitmap = null;
         try {
@@ -84,7 +93,5 @@ public class ImageViewer extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        //temporary
-        UserDataProvider.getInstance().releaseLock();
     }
 }

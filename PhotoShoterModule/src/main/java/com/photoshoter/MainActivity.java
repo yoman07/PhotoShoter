@@ -608,8 +608,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             if (file.exists()) {
                 if (file.delete()) {
                     Log.i(TAG, "file deleted");
-                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-                            Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                    try {
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     Log.i(TAG, "file not deleted");
                 }
