@@ -18,6 +18,8 @@ import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Settings;
 import com.facebook.model.GraphUser;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -71,13 +73,23 @@ public class NonLoggedActivity extends ActionBarActivity {
 
         // Check if there is a currently logged in user
         // and they are linked to a Facebook account.
+        String informationAboutLogged = "non_logged";
         ParseUser currentUser = ParseUser.getCurrentUser();
         if ((currentUser != null) && ParseFacebookUtils.isLinked(currentUser)) {
             // Go to the user info activity
             Log.d("Log in",
                     "User currently logged.");
+            informationAboutLogged = "logged";
             showUserLoggedActivity();
         }
+
+        EasyTracker.getInstance(this).send(MapBuilder
+                        .createEvent("ps_actions",     // Event category (required)
+                                "application_open",  // Event action (required)
+                                informationAboutLogged,   // Event label
+                                null)            // Event value
+                        .build()
+        );
 
 
     }
@@ -112,6 +124,14 @@ public class NonLoggedActivity extends ActionBarActivity {
     public void onLoginButtonClicked() {
 
 
+        EasyTracker.getInstance(this).send(MapBuilder
+                        .createEvent("ps_actions",     // Event category (required)
+                                "facebook",  // Event action (required)
+                                "click_button",   // Event label
+                                null)            // Event value
+                        .build()
+        );
+
         NonLoggedActivity.this.progressDialog = ProgressDialog.show(
                 NonLoggedActivity.this, "", "Logging in...", true);
 
@@ -129,6 +149,14 @@ public class NonLoggedActivity extends ActionBarActivity {
                             "Uh oh. The user cancelled the Facebook login.");
                 } else {
                     getFacebookIdInBackground();
+
+                    EasyTracker.getInstance(NonLoggedActivity.this).send(MapBuilder
+                                    .createEvent("ps_actions",     // Event category (required)
+                                            "facebook",  // Event action (required)
+                                            "logged_successfull",   // Event label
+                                            null)            // Event value
+                                    .build()
+                    );
                 }
             }
         });
@@ -165,5 +193,17 @@ public class NonLoggedActivity extends ActionBarActivity {
         finish();
     }
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance(this).activityStart(this);  // Add this method.
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+    }
 
 }

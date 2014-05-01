@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PhotoShoter.iml" filepath="$PROJECT_DIR$/PhotoShoter.iml" />
       <module fileurl="file://$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" filepath="$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" filepath="$PROJECT_DIR$/PhotoShoterModule/PhotoShoterModule.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/facebook/facebook.iml" filepath="$PROJECT_DIR$/libraries/facebook/facebook.iml" />
     </modules>
   </component>

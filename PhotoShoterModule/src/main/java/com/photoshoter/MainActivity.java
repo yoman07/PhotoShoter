@@ -31,6 +31,8 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -461,7 +463,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                             FragmentManager fm = getSupportFragmentManager();
                             ImageViewer imageViewerWindow = new ImageViewer();
                             imageViewerWindow.show(fm, "fragment_image_window");
-
+                            EasyTracker.getInstance(MainActivity.this).send(MapBuilder
+                                            .createEvent("ps_actions",     // Event category (required)
+                                                    "open_photo",  // Event action (required)
+                                                    null,   // Event label
+                                                    null)            // Event value
+                                            .build()
+                            );
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.nothing, Toast.LENGTH_SHORT).show();
                         }
@@ -558,6 +566,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
     private void sendImageEvent(Bitmap bm, Location location, String receiverId) {
             MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm),location, receiverId);
             EventBus.getDefault().post(imageEvent);
+        EasyTracker.getInstance(this).send(MapBuilder
+                        .createEvent("ps_actions",     // Event category (required)
+                                "send_photo",  // Event action (required)
+                                null,   // Event label
+                                null)            // Event value
+                        .build()
+        );
     }
 
     public void onEvent(UserPositionEvent userPositionEvent) {
@@ -578,12 +593,28 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
     public  void onEvent(ImageEvent imageEvent) {
         Log.i(TAG, "Got imageEvent with data" + imageEvent.toString());
+
+        String canSeePhoto = "cant_see";
         if (!UserDataProvider.getInstance().isLock()) {
             UserDataProvider.getInstance().holdReceivedBitmap(imageEvent.getSenderId(), ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image()));
             if (!notyficationFlag && markerMap.containsKey(imageEvent.getSenderId())) {
                 notifyUserAboutNewMessage();
+                canSeePhoto= "can_see";
             }
+
+
+
+        } else {
+
         }
+
+        EasyTracker.getInstance(this).send(MapBuilder
+                        .createEvent("ps_actions",     // Event category (required)
+                                "got_photo",  // Event action (required)
+                                canSeePhoto,   // Event label
+                                null)            // Event value
+                        .build()
+        );
     }
 
     private void notifyUserAboutNewMessage() {
@@ -637,6 +668,18 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
             markerIcon.put(userId, result);
             markerMap.put(userId, newMarker);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance(this).activityStart(this);  // Add this method.
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EasyTracker.getInstance(this).activityStop(this);  // Add this method.
     }
 
     private class FetchUserNameFromFb extends AsyncTask<String, Void, String> {

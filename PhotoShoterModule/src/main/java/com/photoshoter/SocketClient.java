@@ -3,6 +3,8 @@ package com.photoshoter;
 import android.location.Location;
 import android.util.Log;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.photoshoter.events.ImageEvent;
 import com.photoshoter.events.MyImageEvent;
 import com.photoshoter.events.MyPositionEvent;
@@ -29,7 +31,7 @@ public class SocketClient {
     private static final String TAG = "SocketClient";
     private static String SERVER_ADRESS = "http://geo-chat.herokuapp.com";
     private static SocketClient ourInstance;
-    private static SocketIO socket;
+    private SocketIO socket;
 
     public static SocketClient getInstance() {
         if (ourInstance == null) {
@@ -176,6 +178,9 @@ public class SocketClient {
     }
 
     public void onEvent(MyImageEvent myImageEvent) {
+
+
+
         checkConnectionAndReconnectIfDisconnect();
         Log.i(TAG, "Got image event" + myImageEvent.toString());
         JSONObject json = new JSONObject();
