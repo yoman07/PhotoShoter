@@ -1,6 +1,6 @@
 package com.photoshoter.models;
 
-import android.graphics.Bitmap;
+import android.net.Uri;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,13 @@ import java.util.Map;
 public class UserDataProvider {
 
     private static UserDataProvider instance;
-
+    //Maping user FB id to user first name
+    private Map<String, String> userMap = new HashMap<String, String>();
+    //hold reference to received bitmap - temporary inefficient solution - lack of time
+    private Uri currentPhoto;
+    private String senderID;
+    //lock for image receiving
+    private boolean lock = false;
 
     public static UserDataProvider getInstance() {
         if (instance == null) {
@@ -19,9 +25,6 @@ public class UserDataProvider {
         }
         return instance;
     }
-
-    //Maping user FB id to user first name
-    private Map<String, String> userMap = new HashMap<String, String>();
 
     public void addUser(String fb_id, String name) {
         userMap.put(fb_id, name);
@@ -35,13 +38,7 @@ public class UserDataProvider {
         return userMap.containsKey(fb_id);
     }
 
-    //hold reference to received bitmap - temporary inefficient solution - lack of time
-    private Bitmap currentPhoto;
-    private String senderID;
-    //lock for image receiving
-    private boolean lock = false;
-
-    public void holdReceivedBitmap(String senderID, Bitmap currentPhoto) {
+    public void holdReceivedBitmap(String senderID, Uri currentPhoto) {
         this.senderID = senderID;
         this.currentPhoto = currentPhoto;
     }
@@ -50,7 +47,7 @@ public class UserDataProvider {
         return senderID;
     }
 
-    public Bitmap getCurrentPhoto() {
+    public Uri getCurrentPhoto() {
         return currentPhoto;
     }
 

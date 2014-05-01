@@ -25,17 +25,33 @@ android {
         abortOnError false
     }
 
+//launchctl setenv
+
+    allprojects {
+        afterEvaluate { project ->
+            def propsFile = rootProject.file('keystore.properties')
+            def configName = 'release'
+            println "allprojects after evaulate test " + propsFile.exists()
+
+            if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
+                println "allprojects exists " + propsFile.exists()
+
+                def props = new Properties()
+                props.load(new FileInputStream(propsFile))
+                android.signingConfigs[configName].storeFile = file(props['storeFile'])
+                android.signingConfigs[configName].storePassword = props['storePassword']
+                android.signingConfigs[configName].keyAlias = props['keyAlias']
+                android.signingConfigs[configName].keyPassword = props['keyPassword']
+            }
+        }
+    }
 
     signingConfigs {
         release {
-            storeFile file("photoShoter.jks")
-            keyAlias "com.photoshoter"
-            def password = null
-            def console = System.console()
-            if (console != null) {
-                storePassword console.readPassword("Enter keystore password: ")
-                keyPassword console.readPassword("\nKey password: ")
-            }
+//            storeFile file("photoShoter.jks")
+//            keyAlias "com.photoshoter"
+//            storePassword System.getenv("KSTOREPWDPHOTOSHOTER")
+//            keyPassword System.getenv("KSTOREPWDPHOTOSHOTER")
 
         }
     }
@@ -60,4 +76,11 @@ dependencies {
     compile project(':libraries:facebook')
     compile 'de.greenrobot:eventbus:2.2.0'
     compile 'com.squareup.picasso:picasso:2.2.0'
+}
+
+
+task hello {
+    doLast {
+        println System.getenv("KSTOREPWDPHOTOSHOTER")
+    }
 }

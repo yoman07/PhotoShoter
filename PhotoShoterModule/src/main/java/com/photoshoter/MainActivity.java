@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
@@ -44,7 +45,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
-import com.parse.ParseUser;
 import com.photoshoter.events.ImageEvent;
 import com.photoshoter.events.MyImageEvent;
 import com.photoshoter.events.MyPositionEvent;
@@ -70,6 +70,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -82,7 +84,6 @@ import de.greenrobot.event.EventBus;
 public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = "MainActivity";
-
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -263,6 +264,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         SocketClient.getInstance().disconnectFromServer();
         isSocketOpen = false;
         notyficationFlag = false;
+        deleteImage();
         UserDataProvider.getInstance().removeCurrenPhoto();
         finish();
     }
@@ -314,13 +316,13 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle(R.string.gps_provider_title)
                 .setMessage(R.string.gps_provider_body)
-                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(settingsIntent);
                     }
                 })
-                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
                     }
@@ -357,6 +359,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                 }
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK) {
+                    //TODO: work on quality improvement
                     Bundle extras = data.getExtras();
                     Bitmap imageBitmap = (Bitmap) extras.get("data");
                     if (imageBitmap != null && markerMap.containsKey(receiverId)) {
@@ -564,7 +567,7 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
 
 
     private void sendImageEvent(Bitmap bm, Location location, String receiverId) {
-            MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm),location, receiverId);
+        MyImageEvent imageEvent = new MyImageEvent(ImageHelper.base64FormatFromBitmap(bm), location, receiverId);
             EventBus.getDefault().post(imageEvent);
         EasyTracker.getInstance(this).send(MapBuilder
                         .createEvent("ps_actions",     // Event category (required)
@@ -591,12 +594,12 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
         moveMarker(userId, null, true);
     }
 
-    public  void onEvent(ImageEvent imageEvent) {
+    public void onEvent(ImageEvent imageEvent) {
         Log.i(TAG, "Got imageEvent with data" + imageEvent.toString());
 
         String canSeePhoto = "cant_see";
         if (!UserDataProvider.getInstance().isLock()) {
-            UserDataProvider.getInstance().holdReceivedBitmap(imageEvent.getSenderId(), ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image()));
+            UserDataProvider.getInstance().holdReceivedBitmap(imageEvent.getSenderId(), getPictureUri(ImageHelper.bitmapFromBase64Format(imageEvent.getBase64image())));
             if (!notyficationFlag && markerMap.containsKey(imageEvent.getSenderId())) {
                 notifyUserAboutNewMessage();
                 canSeePhoto= "can_see";
@@ -639,6 +642,54 @@ public class MainActivity extends ActionBarActivity implements GoogleMap.OnMarke
                 }
             }
         });
+    }
+
+    private synchronized Uri getPictureUri(Bitmap bmp) {
+
+        File APP_FILE_PATH = new File(Environment.getExternalStorageDirectory()
+                .getPath() + "/" + getString(R.string.app_name) + "/");
+        if (!APP_FILE_PATH.exists()) {
+            APP_FILE_PATH.mkdirs();
+        }
+
+        File file = new File(APP_FILE_PATH, "image.png");
+        Uri imageFileUri = Uri.fromFile(file);
+
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(file, false);
+            bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (Throwable ignore) {
+            }
+        }
+        return imageFileUri;
+    }
+
+    private void deleteImage() {
+
+        try {
+            File file = new File(UserDataProvider.getInstance().getCurrentPhoto().getPath());
+            if (file.exists()) {
+                if (file.delete()) {
+                    Log.i(TAG, "file deleted");
+                    try {
+                        sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+                                Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.i(TAG, "file not deleted");
+                }
+            }
+        } catch (NullPointerException e) {
+            Log.i(TAG, "file not found");
+        }
     }
 
 

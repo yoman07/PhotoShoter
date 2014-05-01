@@ -33,17 +33,16 @@ public class SocketClient {
     private static SocketClient ourInstance;
     private SocketIO socket;
 
+    private SocketClient() {
+        EventBus.getDefault().register(this);
+    }
+
     public static SocketClient getInstance() {
         if (ourInstance == null) {
             ourInstance = new SocketClient();
         }
         return ourInstance;
     }
-
-    private SocketClient() {
-        EventBus.getDefault().register(this);
-    }
-
 
     public void connect() throws MalformedURLException {
         this.socket = new SocketIO(SERVER_ADRESS);
@@ -87,7 +86,7 @@ public class SocketClient {
                     receivedPositionUpdate(json);
                 } else if (event.equals("close")) {
                     receivedUserDisconnect(json);
-                } else if(event.equals("photo_received")) {
+                } else if (event.equals("photo_received")) {
                     receivedPhoto(json);
                 }
                 Log.i(TAG, "Server triggered event '" + event + "'" + args.toString());
@@ -122,7 +121,7 @@ public class SocketClient {
 
             String base64image = json.getString("image");
 
-            ImageEvent imageEvent = new ImageEvent(fbId,loc,base64image);
+            ImageEvent imageEvent = new ImageEvent(fbId, loc, base64image);
             EventBus.getDefault().post(imageEvent);
 
         } catch (JSONException e) {
@@ -161,6 +160,7 @@ public class SocketClient {
     public void disconnectFromServer() {
         socket.disconnect();
         ourInstance = null;
+        EventBus.getDefault().unregister(this);
     }
 
     public void onEvent(MyPositionEvent myPositionEvent) {
@@ -198,7 +198,7 @@ public class SocketClient {
     }
 
     private void checkConnectionAndReconnectIfDisconnect() {
-        if(this.socket != null && !this.socket.isConnected()) {
+        if (this.socket != null && !this.socket.isConnected()) {
             try {
                 this.socket.reconnect();
             } catch (NullPointerException e) {
