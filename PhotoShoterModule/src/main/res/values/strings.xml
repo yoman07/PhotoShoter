@@ -25,4 +25,6 @@
     <string name="open_picture">Otwórz zdjęcie</string>
     <string name="only_you">To ty</string>
     <string name="nothing">Nic tu nie ma :(</string>
+    <string name="yes">TAK</string>
+    <string name="no">NIE</string>
 </resources>
